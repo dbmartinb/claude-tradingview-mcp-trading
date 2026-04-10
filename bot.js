@@ -73,12 +73,24 @@ function checkOnboarding() {
 
 // ─── Config ────────────────────────────────────────────────────────────────
 
+function parsePositiveFloat(val, fallback, name) {
+  const n = parseFloat(val ?? fallback);
+  if (isNaN(n) || n <= 0) throw new Error(`Invalid config: ${name} must be a positive number (got "${val}")`);
+  return n;
+}
+
+function parsePositiveInt(val, fallback, name) {
+  const n = parseInt(val ?? fallback, 10);
+  if (isNaN(n) || n <= 0) throw new Error(`Invalid config: ${name} must be a positive integer (got "${val}")`);
+  return n;
+}
+
 const CONFIG = {
   symbol: process.env.SYMBOL || "BTCUSDT",
   timeframe: process.env.TIMEFRAME || "4H",
-  portfolioValue: parseFloat(process.env.PORTFOLIO_VALUE_USD || "1000"),
-  maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
-  maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "3"),
+  portfolioValue: parsePositiveFloat(process.env.PORTFOLIO_VALUE_USD, "1000", "PORTFOLIO_VALUE_USD"),
+  maxTradeSizeUSD: parsePositiveFloat(process.env.MAX_TRADE_SIZE_USD, "100", "MAX_TRADE_SIZE_USD"),
+  maxTradesPerDay: parsePositiveInt(process.env.MAX_TRADES_PER_DAY, "3", "MAX_TRADES_PER_DAY"),
   paperTrading: process.env.PAPER_TRADING !== "false",
   coinbase: {
     apiKeyName: process.env.COINBASE_API_KEY_NAME,
@@ -129,14 +141,21 @@ async function fetchCandles(symbol, interval, limit = 100) {
   if (!res.ok) throw new Error(`Binance API error: ${res.status}`);
   const data = await res.json();
 
-  return data.map((k) => ({
-    time: k[0],
-    open: parseFloat(k[1]),
-    high: parseFloat(k[2]),
-    low: parseFloat(k[3]),
-    close: parseFloat(k[4]),
-    volume: parseFloat(k[5]),
-  }));
+  return data.map((k, i) => {
+    const [time, open, high, low, close, volume] = k;
+    const candle = {
+      time: time,
+      open: parseFloat(open),
+      high: parseFloat(high),
+      low: parseFloat(low),
+      close: parseFloat(close),
+      volume: parseFloat(volume),
+    };
+    if (Object.values(candle).some((v) => isNaN(v))) {
+      throw new Error(`Invalid candle data at index ${i}: ${JSON.stringify(k)}`);
+    }
+    return candle;
+  });
 }
 
 // ─── Indicator Calculations ──────────────────────────────────────────────────
@@ -352,7 +371,7 @@ async function placeCoinbaseOrder(symbol, side, sizeUSD) {
   const token = signCoinbase("POST", path);
 
   const body = JSON.stringify({
-    client_order_id: `claude-${Date.now()}`,
+    client_order_id: crypto.randomUUID(),
     product_id: productId,
     side: side.toUpperCase(),
     order_configuration: {
@@ -371,14 +390,16 @@ async function placeCoinbaseOrder(symbol, side, sizeUSD) {
     body,
   });
 
-  const data = await res.json();
-  if (!data.success) {
-    throw new Error(
-      `Coinbase order failed: ${data.error_response?.message || JSON.stringify(data)}`,
-    );
+  if (!res.ok) {
+    throw new Error(`Coinbase API error: HTTP ${res.status}`);
   }
 
-  return { orderId: data.order_id };
+  const data = await res.json();
+  if (!data.success) {
+    throw new Error(`Coinbase order failed: ${data.error_response?.message ?? "unknown error"}`);
+  }
+
+  return { orderId: data.order_id ?? "unknown" };
 }
 
 // ─── Tax CSV Logging ─────────────────────────────────────────────────────────
@@ -519,7 +540,12 @@ async function run() {
   console.log("═══════════════════════════════════════════════════════════");
 
   // Load strategy
-  const rules = JSON.parse(readFileSync("rules.json", "utf8"));
+  let rules;
+  try {
+    rules = JSON.parse(readFileSync("rules.json", "utf8"));
+  } catch {
+    throw new Error("Failed to parse rules.json — check the file is valid JSON");
+  }
   console.log(`\nStrategy: ${rules.strategy.name}`);
   console.log(`Symbol: ${CONFIG.symbol} | Timeframe: ${CONFIG.timeframe}`);
 

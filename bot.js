@@ -17,7 +17,7 @@ import { execSync } from "child_process";
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
 function checkOnboarding() {
-  const required = ["BITGET_API_KEY", "BITGET_SECRET_KEY", "BITGET_PASSPHRASE"];
+  const required = ["COINBASE_API_KEY_NAME", "COINBASE_PRIVATE_KEY"];
   const missing = required.filter((k) => !process.env[k]);
 
   if (missing.length === 0) return;
@@ -29,10 +29,10 @@ function checkOnboarding() {
     writeFileSync(
       ".env",
       [
-        "# BitGet credentials",
-        "BITGET_API_KEY=",
-        "BITGET_SECRET_KEY=",
-        "BITGET_PASSPHRASE=",
+        "# Coinbase Advanced credentials",
+        "# Get these from: advanced.coinbase.com → Settings → API",
+        "COINBASE_API_KEY_NAME=",
+        "COINBASE_PRIVATE_KEY=",
         "",
         "# Trading config",
         "PORTFOLIO_VALUE_USD=1000",
@@ -47,7 +47,7 @@ function checkOnboarding() {
       execSync("open .env");
     } catch {}
     console.log(
-      "Fill in your BitGet credentials in .env then re-run: node bot.js\n",
+      "Fill in your Coinbase credentials in .env then re-run: node bot.js\n",
     );
     process.exit(0);
   }
@@ -80,12 +80,10 @@ const CONFIG = {
   maxTradeSizeUSD: parseFloat(process.env.MAX_TRADE_SIZE_USD || "100"),
   maxTradesPerDay: parseInt(process.env.MAX_TRADES_PER_DAY || "3"),
   paperTrading: process.env.PAPER_TRADING !== "false",
-  tradeMode: process.env.TRADE_MODE || "spot",
-  bitget: {
-    apiKey: process.env.BITGET_API_KEY,
-    secretKey: process.env.BITGET_SECRET_KEY,
-    passphrase: process.env.BITGET_PASSPHRASE,
-    baseUrl: process.env.BITGET_BASE_URL || "https://api.bitget.com",
+  coinbase: {
+    apiKeyName: process.env.COINBASE_API_KEY_NAME,
+    privateKey: process.env.COINBASE_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    baseUrl: "https://api.coinbase.com",
   },
 };
 
@@ -317,56 +315,70 @@ function checkTradeLimits(log) {
   return true;
 }
 
-// ─── BitGet Execution ────────────────────────────────────────────────────────
+// ─── Coinbase Execution ──────────────────────────────────────────────────────
 
-function signBitGet(timestamp, method, path, body = "") {
-  const message = `${timestamp}${method}${path}${body}`;
-  return crypto
-    .createHmac("sha256", CONFIG.bitget.secretKey)
-    .update(message)
-    .digest("base64");
+function toCoinbaseSymbol(symbol) {
+  // BTCUSDT -> BTC-USDT, ETHUSDT -> ETH-USDT, etc.
+  return symbol.replace(/^([A-Z]+)(USDT|USDC|BTC|ETH)$/, "$1-$2");
 }
 
-async function placeBitGetOrder(symbol, side, sizeUSD, price) {
-  const quantity = (sizeUSD / price).toFixed(6);
-  const timestamp = Date.now().toString();
-  const path =
-    CONFIG.tradeMode === "spot"
-      ? "/api/v2/spot/trade/placeOrder"
-      : "/api/v2/mix/order/placeOrder";
+function signCoinbase(method, path) {
+  const now = Math.floor(Date.now() / 1000);
+  const header = Buffer.from(
+    JSON.stringify({ alg: "ES256", kid: CONFIG.coinbase.apiKeyName }),
+  ).toString("base64url");
+  const payload = Buffer.from(
+    JSON.stringify({
+      sub: CONFIG.coinbase.apiKeyName,
+      iss: "cdp",
+      nbf: now,
+      exp: now + 120,
+      uri: `${method} ${path}`,
+    }),
+  ).toString("base64url");
+  const data = `${header}.${payload}`;
+  const sign = crypto.createSign("SHA256");
+  sign.update(data);
+  const signature = sign.sign(
+    { key: CONFIG.coinbase.privateKey, dsaEncoding: "ieee-p1363" },
+    "base64url",
+  );
+  return `${data}.${signature}`;
+}
+
+async function placeCoinbaseOrder(symbol, side, sizeUSD) {
+  const productId = toCoinbaseSymbol(symbol);
+  const path = "/api/v3/brokerage/orders";
+  const token = signCoinbase("POST", path);
 
   const body = JSON.stringify({
-    symbol,
-    side,
-    orderType: "market",
-    quantity,
-    ...(CONFIG.tradeMode === "futures" && {
-      productType: "USDT-FUTURES",
-      marginMode: "isolated",
-      marginCoin: "USDT",
-    }),
+    client_order_id: `claude-${Date.now()}`,
+    product_id: productId,
+    side: side.toUpperCase(),
+    order_configuration: {
+      market_market_ioc: {
+        quote_size: sizeUSD.toFixed(2),
+      },
+    },
   });
 
-  const signature = signBitGet(timestamp, "POST", path, body);
-
-  const res = await fetch(`${CONFIG.bitget.baseUrl}${path}`, {
+  const res = await fetch(`${CONFIG.coinbase.baseUrl}${path}`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      "ACCESS-KEY": CONFIG.bitget.apiKey,
-      "ACCESS-SIGN": signature,
-      "ACCESS-TIMESTAMP": timestamp,
-      "ACCESS-PASSPHRASE": CONFIG.bitget.passphrase,
+      Authorization: `Bearer ${token}`,
     },
     body,
   });
 
   const data = await res.json();
-  if (data.code !== "00000") {
-    throw new Error(`BitGet order failed: ${data.msg}`);
+  if (!data.success) {
+    throw new Error(
+      `Coinbase order failed: ${data.error_response?.message || JSON.stringify(data)}`,
+    );
   }
 
-  return data.data;
+  return { orderId: data.order_id };
 }
 
 // ─── Tax CSV Logging ─────────────────────────────────────────────────────────
@@ -444,7 +456,7 @@ function writeTradeCsv(logEntry) {
   const row = [
     date,
     time,
-    "BitGet",
+    "Coinbase",
     logEntry.symbol,
     side,
     quantity,
@@ -591,11 +603,10 @@ async function run() {
         `\n🔴 PLACING LIVE ORDER — $${tradeSize.toFixed(2)} BUY ${CONFIG.symbol}`,
       );
       try {
-        const order = await placeBitGetOrder(
+        const order = await placeCoinbaseOrder(
           CONFIG.symbol,
           "buy",
           tradeSize,
-          price,
         );
         logEntry.orderPlaced = true;
         logEntry.orderId = order.orderId;

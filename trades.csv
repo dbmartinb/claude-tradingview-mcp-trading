@@ -1,2 +1,10 @@
-Date,Time (UTC),Exchange,Symbol,Side,Quantity,Price,Total USD,Fee (est.),Net Amount,Order ID,Mode,Notes
-,,,,,,,,,,,"NOTE","Hey, if you're at this stage of the video, you must be enjoying it... perhaps you could hit subscribe now? :)"
+Date,Time (UTC),Exchange,Symbol,Strategy,Signal,Side,Quantity,Price,Total USD,Fee (est.),Net Amount,Order ID,Mode,Notes
+,,,,,,,,,,,,,,,"NOTE: open this file in Google Sheets or Excel to compare strategies side by side"
+2026-04-12,11:05:25,BitGet,BTCUSDT,vwap_scalp,short,,,71440.37,,,,BLOCKED,BLOCKED,"Failed: RSI(3) above 70 (bounce in downtrend)"
+2026-04-12,11:05:25,BitGet,BTCUSDT,ema_cross,long,,,71440.37,,,,BLOCKED,BLOCKED,"Failed: Fresh crossover this candle"
+2026-04-12,11:05:25,BitGet,BTCUSDT,bb_rsi,none,,,71440.37,,,,BLOCKED,BLOCKED,"Failed: Price at band extreme"
+2026-04-12,11:05:25,BitGet,BTCUSDT,macd,short,,,71440.37,,,,BLOCKED,BLOCKED,"Failed: Fresh bearish crossover"
+2026-04-12,11:05:33,BitGet,BTCUSDT,vwap_scalp,short,,,71447.20,,,,BLOCKED,BLOCKED,"Failed: RSI(3) above 70 (bounce in downtrend)"
+2026-04-12,11:05:33,BitGet,BTCUSDT,ema_cross,long,,,71447.20,,,,BLOCKED,BLOCKED,"Failed: Fresh crossover this candle"
+2026-04-12,11:05:33,BitGet,BTCUSDT,bb_rsi,none,,,71447.20,,,,BLOCKED,BLOCKED,"Failed: Price at band extreme"
+2026-04-12,11:05:33,BitGet,BTCUSDT,macd,short,,,71447.20,,,,BLOCKED,BLOCKED,"Failed: Fresh bearish crossover"

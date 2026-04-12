@@ -1,0 +1,75 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Strategy 1: VWAP + RSI(3) + EMA(8) Scalping
+// Source: Lewis Jackson
+//
+// How to use:
+//   1. Open TradingView → open a chart (BTCUSDT, 4H recommended)
+//   2. Click "Pine Script Editor" at the bottom
+//   3. Paste this entire script and click "Add to chart"
+//   4. Click "Strategy tester" tab to see backtest results
+//
+// Logic:
+//   LONG  — price above VWAP + above EMA(8) + RSI(3) dips below 30 + within 1.5% of VWAP
+//   SHORT — price below VWAP + below EMA(8) + RSI(3) spikes above 70 + within 1.5% of VWAP
+// ─────────────────────────────────────────────────────────────────────────────
+
+//@version=5
+strategy(
+  title       = "VWAP + RSI(3) + EMA(8) Scalp",
+  shorttitle  = "VWAP Scalp",
+  overlay     = true,
+  default_qty_type  = strategy.percent_of_equity,
+  default_qty_value = 1,
+  commission_type   = strategy.commission.percent,
+  commission_value  = 0.1
+)
+
+// ── Inputs ────────────────────────────────────────────────────────────────────
+emaLen      = input.int(8,   "EMA Length",          minval=1)
+rsiLen      = input.int(3,   "RSI Length",          minval=1)
+rsiOversold = input.int(30,  "RSI Oversold Level",  minval=1,  maxval=49)
+rsiOverbought = input.int(70, "RSI Overbought Level", minval=51, maxval=99)
+maxDistPct  = input.float(1.5, "Max Distance from VWAP (%)", minval=0.1, step=0.1)
+
+// ── Indicators ────────────────────────────────────────────────────────────────
+ema8   = ta.ema(close, emaLen)
+vwap   = ta.vwap(hlc3)
+rsi3   = ta.rsi(close, rsiLen)
+distFromVWAP = math.abs((close - vwap) / vwap) * 100
+
+// ── Conditions ───────────────────────────────────────────────────────────────
+bullishBias = close > vwap and close > ema8
+bearishBias = close < vwap and close < ema8
+notOverextended = distFromVWAP < maxDistPct
+
+longSignal  = bullishBias and ta.crossunder(rsi3, rsiOversold)  and notOverextended
+shortSignal = bearishBias and ta.crossover(rsi3, rsiOverbought) and notOverextended
+
+// ── Entries ───────────────────────────────────────────────────────────────────
+if longSignal
+    strategy.entry("Long", strategy.long)
+
+if shortSignal
+    strategy.entry("Short", strategy.short)
+
+// ── Exits ─────────────────────────────────────────────────────────────────────
+// Exit long when RSI crosses back above 50 or bias flips
+if strategy.position_size > 0 and (ta.crossover(rsi3, 50) or not bullishBias)
+    strategy.close("Long", comment="RSI exit / bias flip")
+
+// Exit short when RSI crosses back below 50 or bias flips
+if strategy.position_size < 0 and (ta.crossunder(rsi3, 50) or not bearishBias)
+    strategy.close("Short", comment="RSI exit / bias flip")
+
+// Hard stop: 0.3% against entry
+strategy.exit("Long Stop",  "Long",  loss=strategy.position_avg_price * 0.003 / syminfo.mintick)
+strategy.exit("Short Stop", "Short", loss=strategy.position_avg_price * 0.003 / syminfo.mintick)
+
+// ── Plots ─────────────────────────────────────────────────────────────────────
+plot(ema8, "EMA(8)", color=color.orange, linewidth=2)
+plot(vwap, "VWAP",   color=color.blue,   linewidth=2)
+
+plotshape(longSignal,  title="Long",  location=location.belowbar, style=shape.triangleup,   color=color.green, size=size.small)
+plotshape(shortSignal, title="Short", location=location.abovebar, style=shape.triangledown, color=color.red,   size=size.small)
+
+bgcolor(bullishBias ? color.new(color.green, 95) : bearishBias ? color.new(color.red, 95) : na, title="Bias")

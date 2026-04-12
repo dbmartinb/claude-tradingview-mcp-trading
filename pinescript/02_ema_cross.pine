@@ -1,0 +1,74 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Strategy 2: EMA(9/21) Crossover
+//
+// How to use:
+//   1. Open TradingView → open a chart (BTCUSDT, 4H recommended)
+//   2. Click "Pine Script Editor" at the bottom
+//   3. Paste this entire script and click "Add to chart"
+//   4. Click "Strategy tester" tab to see backtest results
+//
+// Logic:
+//   LONG  — EMA(9) freshly crosses above EMA(21) AND RSI(14) < 70
+//   SHORT — EMA(9) freshly crosses below EMA(21) AND RSI(14) > 30
+//
+// This is a trend-following strategy. It fires once when a new trend begins
+// and does nothing while the trend is already running.
+// ─────────────────────────────────────────────────────────────────────────────
+
+//@version=5
+strategy(
+  title       = "EMA(9/21) Crossover",
+  shorttitle  = "EMA Cross",
+  overlay     = true,
+  default_qty_type  = strategy.percent_of_equity,
+  default_qty_value = 1,
+  commission_type   = strategy.commission.percent,
+  commission_value  = 0.1
+)
+
+// ── Inputs ────────────────────────────────────────────────────────────────────
+fastLen = input.int(9,  "Fast EMA", minval=1)
+slowLen = input.int(21, "Slow EMA", minval=1)
+rsiLen  = input.int(14, "RSI Length", minval=1)
+
+// ── Indicators ────────────────────────────────────────────────────────────────
+ema9  = ta.ema(close, fastLen)
+ema21 = ta.ema(close, slowLen)
+rsi14 = ta.rsi(close, rsiLen)
+
+// ── Conditions ───────────────────────────────────────────────────────────────
+// ta.crossover fires TRUE only on the exact candle of the cross — perfect for this strategy
+goldenCross = ta.crossover(ema9, ema21)   // fast crosses above slow
+deathCross  = ta.crossunder(ema9, ema21)  // fast crosses below slow
+
+longSignal  = goldenCross and rsi14 < 70
+shortSignal = deathCross  and rsi14 > 30
+
+// ── Entries ───────────────────────────────────────────────────────────────────
+if longSignal
+    strategy.entry("Long", strategy.long)
+
+if shortSignal
+    strategy.entry("Short", strategy.short)
+
+// ── Exits ─────────────────────────────────────────────────────────────────────
+// Exit when the cross reverses
+if ta.crossunder(ema9, ema21)
+    strategy.close("Long", comment="Death cross")
+
+if ta.crossover(ema9, ema21)
+    strategy.close("Short", comment="Golden cross")
+
+// Hard stop: 1% against entry
+strategy.exit("Long Stop",  "Long",  loss=strategy.position_avg_price * 0.01 / syminfo.mintick)
+strategy.exit("Short Stop", "Short", loss=strategy.position_avg_price * 0.01 / syminfo.mintick)
+
+// ── Plots ─────────────────────────────────────────────────────────────────────
+fastPlot = plot(ema9,  "EMA(9)",  color=color.new(color.orange, 0), linewidth=2)
+slowPlot = plot(ema21, "EMA(21)", color=color.new(color.blue,   0), linewidth=2)
+
+// Fill between EMAs — green when fast above slow, red when below
+fill(fastPlot, slowPlot, color=ema9 > ema21 ? color.new(color.green, 85) : color.new(color.red, 85), title="EMA Cloud")
+
+plotshape(longSignal,  title="Golden Cross", location=location.belowbar, style=shape.triangleup,   color=color.green, size=size.normal, text="✕")
+plotshape(shortSignal, title="Death Cross",  location=location.abovebar, style=shape.triangledown, color=color.red,   size=size.normal, text="✕")

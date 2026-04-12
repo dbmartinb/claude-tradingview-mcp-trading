@@ -1,0 +1,82 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Strategy 3: Bollinger Bands + RSI(14)
+//
+// How to use:
+//   1. Open TradingView → open a chart (BTCUSDT, 4H recommended)
+//   2. Click "Pine Script Editor" at the bottom
+//   3. Paste this entire script and click "Add to chart"
+//   4. Click "Strategy tester" tab to see backtest results
+//
+// Logic:
+//   LONG  — price touches lower Bollinger Band AND RSI(14) < 35
+//   SHORT — price touches upper Bollinger Band AND RSI(14) > 65
+//
+// This is a mean reversion strategy — it bets that price will snap back
+// to the middle band after stretching too far. Works best in ranging markets,
+// less well during strong sustained trends.
+// ─────────────────────────────────────────────────────────────────────────────
+
+//@version=5
+strategy(
+  title       = "Bollinger Bands + RSI(14)",
+  shorttitle  = "BB + RSI",
+  overlay     = true,
+  default_qty_type  = strategy.percent_of_equity,
+  default_qty_value = 1,
+  commission_type   = strategy.commission.percent,
+  commission_value  = 0.1
+)
+
+// ── Inputs ────────────────────────────────────────────────────────────────────
+bbLen    = input.int(20,  "BB Length",          minval=1)
+bbMult   = input.float(2.0, "BB Std Dev",       minval=0.1, step=0.1)
+rsiLen   = input.int(14,  "RSI Length",         minval=1)
+rsiLong  = input.int(35,  "RSI Oversold",       minval=1,  maxval=49)
+rsiShort = input.int(65,  "RSI Overbought",     minval=51, maxval=99)
+minBandWidthPct = input.float(1.0, "Min Band Width % (filters flat markets)", minval=0.1, step=0.1)
+
+// ── Indicators ────────────────────────────────────────────────────────────────
+[bbMiddle, bbUpper, bbLower] = ta.bb(close, bbLen, bbMult)
+rsi14     = ta.rsi(close, rsiLen)
+bandWidth = (bbUpper - bbLower) / bbMiddle * 100
+
+// ── Conditions ───────────────────────────────────────────────────────────────
+bandsWideEnough = bandWidth > minBandWidthPct
+atLowerBand     = close <= bbLower * 1.002   // within 0.2% of lower band
+atUpperBand     = close >= bbUpper * 0.998
+
+longSignal  = atLowerBand and rsi14 < rsiLong  and bandsWideEnough
+shortSignal = atUpperBand and rsi14 > rsiShort and bandsWideEnough
+
+// ── Entries ───────────────────────────────────────────────────────────────────
+if longSignal
+    strategy.entry("Long", strategy.long)
+
+if shortSignal
+    strategy.entry("Short", strategy.short)
+
+// ── Exits ─────────────────────────────────────────────────────────────────────
+// Exit long at the middle band (take profit target)
+if strategy.position_size > 0 and close >= bbMiddle
+    strategy.close("Long", comment="Middle band TP")
+
+// Exit short at the middle band
+if strategy.position_size < 0 and close <= bbMiddle
+    strategy.close("Short", comment="Middle band TP")
+
+// Hard stop: price breaks further past the band by 0.5%
+strategy.exit("Long Stop",  "Long",  stop=bbLower * 0.995)
+strategy.exit("Short Stop", "Short", stop=bbUpper * 1.005)
+
+// ── Plots ─────────────────────────────────────────────────────────────────────
+upperPlot  = plot(bbUpper,  "BB Upper",  color=color.new(color.blue, 50))
+middlePlot = plot(bbMiddle, "BB Middle", color=color.new(color.blue, 70), style=plot.style_circles)
+lowerPlot  = plot(bbLower,  "BB Lower",  color=color.new(color.blue, 50))
+fill(upperPlot, lowerPlot, color=color.new(color.blue, 92), title="BB Fill")
+
+plotshape(longSignal,  title="Long",  location=location.belowbar, style=shape.triangleup,   color=color.green, size=size.small)
+plotshape(shortSignal, title="Short", location=location.abovebar, style=shape.triangledown, color=color.red,   size=size.small)
+
+// Colour candles when at a band extreme
+barcolor(atLowerBand and rsi14 < rsiLong  ? color.new(color.green, 50) : na, title="Oversold candle")
+barcolor(atUpperBand and rsi14 > rsiShort ? color.new(color.red,   50) : na, title="Overbought candle")

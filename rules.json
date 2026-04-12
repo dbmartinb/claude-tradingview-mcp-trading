@@ -1,50 +1,100 @@
 {
   "watchlist": ["BTCUSDT"],
-  "default_timeframe": "1m",
+  "default_timeframe": "4H",
 
-  "strategy": {
-    "name": "VWAP + RSI(3) + EMA(8) Scalping Strategy",
-    "sources": ["Lewis Jackson"],
-    "description": "Three indicators, each doing a different job. EMA(8) for trend direction, VWAP for session bias, RSI(3) for entry timing. All three must align before a trade fires."
+  "active_strategy": "vwap_scalp",
+  "note": "All 4 strategies run and log every tick. Set STRATEGY= in .env to choose which one executes orders.",
+
+  "strategies": {
+    "vwap_scalp": {
+      "name": "VWAP + RSI(3) + EMA(8) Scalping",
+      "sources": ["Lewis Jackson"],
+      "timeframes": ["1m", "5m", "15m", "4H"],
+      "style": "Scalping — very selective, few signals, high quality",
+      "description": "Three indicators, each doing a different job. EMA(8) for trend direction, VWAP for session bias, RSI(3) for entry timing. All three must align before a trade fires.",
+      "indicators": {
+        "ema_8": "Trend direction. Price above EMA(8) = bullish momentum. Below = bearish.",
+        "vwap": "Session bias. Price above VWAP = buyers in control. Below = sellers. Resets at midnight UTC.",
+        "rsi_3": "Entry timing. RSI on 3 candles only — extremely sensitive. Below 30 in an uptrend = snap-back setup. Above 70 in a downtrend = reversal likely."
+      },
+      "entry": {
+        "long":  ["Price > VWAP", "Price > EMA(8)", "RSI(3) < 30", "Price within 1.5% of VWAP"],
+        "short": ["Price < VWAP", "Price < EMA(8)", "RSI(3) > 70", "Price within 1.5% of VWAP"]
+      },
+      "exit": [
+        "RSI(3) crosses back above 50 (for longs) or below 50 (for shorts)",
+        "Hard stop: 0.3% against entry",
+        "Take profit at next VWAP touch or EMA(8) cross"
+      ]
+    },
+
+    "ema_cross": {
+      "name": "EMA(9/21) Crossover",
+      "timeframes": ["1H", "4H", "1D"],
+      "style": "Trend following — fires once per trend change, rides the move",
+      "description": "When the fast EMA(9) crosses the slow EMA(21), momentum has shifted. Buy the golden cross (9 above 21), sell the death cross (9 below 21). RSI(14) prevents entering at extremes. Only fires on a fresh cross — not on an already-running trend.",
+      "indicators": {
+        "ema_9":  "Fast average — reacts quickly to price changes.",
+        "ema_21": "Slow average — represents the medium-term trend.",
+        "rsi_14": "Confirms momentum. Keeps you out when price is already overextended."
+      },
+      "entry": {
+        "long":  ["EMA(9) > EMA(21)", "Fresh crossover this candle", "RSI(14) < 70"],
+        "short": ["EMA(9) < EMA(21)", "Fresh crossover this candle", "RSI(14) > 30"]
+      },
+      "exit": [
+        "EMA(9) crosses back",
+        "Hard stop: 1% against entry"
+      ]
+    },
+
+    "bb_rsi": {
+      "name": "Bollinger Bands + RSI(14)",
+      "timeframes": ["15m", "1H", "4H"],
+      "style": "Mean reversion — bets on price snapping back to the middle",
+      "description": "Bollinger Bands form a dynamic channel around the 20-period average. When price touches the outer edge, it has stretched too far and tends to return to the middle. RSI(14) confirms the stretch. Works best when the market is ranging, not trending strongly.",
+      "indicators": {
+        "bb_upper": "Upper band = 20-period SMA + 2 standard deviations. Overbought zone.",
+        "bb_lower": "Lower band = 20-period SMA - 2 standard deviations. Oversold zone.",
+        "bb_middle": "20-period SMA — the target when price snaps back.",
+        "rsi_14": "Confirms the extreme. RSI < 35 at lower band = strong oversold. RSI > 65 at upper band = strong overbought."
+      },
+      "entry": {
+        "long":  ["Price ≤ lower Bollinger Band", "RSI(14) < 35", "Band width > 1% (not flat market)"],
+        "short": ["Price ≥ upper Bollinger Band", "RSI(14) > 65", "Band width > 1%"]
+      },
+      "exit": [
+        "Price returns to middle band (20 SMA)",
+        "Hard stop: price breaks further past the band by 0.5%"
+      ]
+    },
+
+    "macd": {
+      "name": "MACD Crossover (12/26/9)",
+      "timeframes": ["1H", "4H", "1D"],
+      "style": "Momentum — catches the start of a new move",
+      "description": "MACD measures the difference between two EMAs (12 and 26). When this difference crosses its own 9-period average (the signal line), momentum has just shifted. A bullish cross = buy. A bearish cross = sell. Only fires on a fresh cross — the entry is the moment momentum changes, not after it's already moved.",
+      "indicators": {
+        "macd_line":   "EMA(12) minus EMA(26). Positive = recent momentum faster than medium-term.",
+        "signal_line": "9-period EMA of the MACD line. Smooths out the signal.",
+        "histogram":   "MACD minus signal. Positive = bullish momentum building."
+      },
+      "entry": {
+        "long":  ["MACD line crosses above signal line (fresh bullish cross)"],
+        "short": ["MACD line crosses below signal line (fresh bearish cross)"]
+      },
+      "exit": [
+        "MACD crosses back the other direction",
+        "Hard stop: 1% against entry"
+      ]
+    }
   },
-
-  "indicators": {
-    "ema_8": "Trend direction. Price above EMA(8) = bullish momentum. Below = bearish.",
-    "vwap": "Session bias. Price above VWAP = buyers in control. Below = sellers. Resets at midnight UTC.",
-    "rsi_3": "Entry timing. RSI on 3 candles only — extremely sensitive. Below 30 in an uptrend = snap-back setup. Above 70 in a downtrend = reversal likely."
-  },
-
-  "bias_criteria": {
-    "bullish": ["Price is above VWAP", "Price is above EMA(8)"],
-    "bearish": ["Price is below VWAP", "Price is below EMA(8)"]
-  },
-
-  "entry_rules": {
-    "long": [
-      "Price is above VWAP — buyers in control for the session",
-      "Price is above EMA(8) — uptrend confirmed",
-      "RSI(3) has dropped below 30 — short-term pullback in an uptrend, snap-back likely"
-    ],
-    "short": [
-      "Price is below VWAP — sellers in control",
-      "Price is below EMA(8) — downtrend confirmed",
-      "RSI(3) has spiked above 70 — overbought in a downtrend, reversal likely"
-    ]
-  },
-
-  "exit_rules": [
-    "Exit when RSI(3) crosses back above 50 (for longs) or below 50 (for shorts)",
-    "Hard stop: 0.3% below entry for longs, 0.3% above entry for shorts",
-    "Take profit at next VWAP touch or EMA(8) cross"
-  ],
 
   "risk_rules": [
     "Risk maximum 1% of portfolio per trade",
     "Maximum trade size capped by MAX_TRADE_SIZE_USD in .env",
-    "Maximum trades per day capped by MAX_TRADES_PER_DAY in .env",
-    "Do not trade if price is more than 1.5% away from VWAP — overextended",
-    "Paper trade first — validate this strategy on your specific asset before going live"
-  ],
-
-  "notes": "Scalping strategy — designed for 1m to 5m timeframes. RSI(3) is intentionally fast and sensitive. Do not apply to higher timeframes."
+    "Maximum trades per day capped by MAX_TRADES_PER_DAY in .env — per strategy",
+    "Paper trade first — validate on your specific asset before going live",
+    "Run all 4 strategies for at least 2 weeks before comparing results"
+  ]
 }

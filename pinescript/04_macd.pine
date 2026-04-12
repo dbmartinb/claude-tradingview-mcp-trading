@@ -1,0 +1,74 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// Strategy 4: MACD Crossover (12/26/9)
+//
+// How to use:
+//   1. Open TradingView → open a chart (BTCUSDT, 4H recommended)
+//   2. Click "Pine Script Editor" at the bottom
+//   3. Paste this entire script and click "Add to chart"
+//   4. Click "Strategy tester" tab to see backtest results
+//
+// Logic:
+//   LONG  — MACD line freshly crosses above signal line
+//   SHORT — MACD line freshly crosses below signal line
+//
+// MACD measures momentum. When the MACD line crosses the signal line,
+// momentum has just shifted direction. Fresh cross only — not a running trend.
+// ─────────────────────────────────────────────────────────────────────────────
+
+//@version=5
+strategy(
+  title       = "MACD Crossover (12/26/9)",
+  shorttitle  = "MACD Cross",
+  overlay     = false,   // MACD draws in its own pane below the chart
+  default_qty_type  = strategy.percent_of_equity,
+  default_qty_value = 1,
+  commission_type   = strategy.commission.percent,
+  commission_value  = 0.1
+)
+
+// ── Inputs ────────────────────────────────────────────────────────────────────
+fastLen   = input.int(12, "Fast EMA",   minval=1)
+slowLen   = input.int(26, "Slow EMA",   minval=1)
+signalLen = input.int(9,  "Signal EMA", minval=1)
+
+// ── Indicators ────────────────────────────────────────────────────────────────
+[macdLine, signalLine, histLine] = ta.macd(close, fastLen, slowLen, signalLen)
+
+// ── Conditions ───────────────────────────────────────────────────────────────
+// ta.crossover fires TRUE only on the exact candle of the cross
+bullishCross = ta.crossover(macdLine, signalLine)
+bearishCross = ta.crossunder(macdLine, signalLine)
+
+// ── Entries ───────────────────────────────────────────────────────────────────
+if bullishCross
+    strategy.entry("Long", strategy.long)
+
+if bearishCross
+    strategy.entry("Short", strategy.short)
+
+// ── Exits ─────────────────────────────────────────────────────────────────────
+// Exit when cross reverses
+if bearishCross
+    strategy.close("Long", comment="Bearish cross")
+
+if bullishCross
+    strategy.close("Short", comment="Bullish cross")
+
+// Hard stop: 1% against entry
+strategy.exit("Long Stop",  "Long",  loss=strategy.position_avg_price * 0.01 / syminfo.mintick)
+strategy.exit("Short Stop", "Short", loss=strategy.position_avg_price * 0.01 / syminfo.mintick)
+
+// ── Plots ─────────────────────────────────────────────────────────────────────
+// Histogram — green when bullish, red when bearish
+histColor = histLine >= 0
+  ? (histLine > histLine[1] ? color.new(color.green, 20) : color.new(color.green, 60))
+  : (histLine < histLine[1] ? color.new(color.red,   20) : color.new(color.red,   60))
+
+plot(histLine,   "Histogram",    style=plot.style_columns, color=histColor)
+plot(macdLine,   "MACD",         color=color.new(color.blue,   0), linewidth=2)
+plot(signalLine, "Signal",       color=color.new(color.orange, 0), linewidth=2)
+hline(0, "Zero Line", color=color.new(color.gray, 50), linestyle=hline.style_dashed)
+
+// Signal markers on the MACD line itself
+plotshape(bullishCross, title="Bullish Cross", location=location.absolute, style=shape.circle, color=color.green, size=size.small, offset=0)
+plotshape(bearishCross, title="Bearish Cross", location=location.absolute, style=shape.circle, color=color.red,   size=size.small, offset=0)

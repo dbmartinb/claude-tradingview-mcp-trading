@@ -1,0 +1,16 @@
+{
+  "name": "trade-logger-fn",
+  "version": "1.0.0",
+  "description": "Azure Function relay — receives trade logs from Railway and writes to Azure SQL",
+  "main": "src/functions/logTrade.js",
+  "scripts": {
+    "start": "func start"
+  },
+  "dependencies": {
+    "@azure/functions": "^4.5.0",
+    "mssql": "^12.2.1"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

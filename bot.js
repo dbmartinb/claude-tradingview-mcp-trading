@@ -30,7 +30,7 @@ import "dotenv/config";
 import { readFileSync, writeFileSync, existsSync, appendFileSync } from "fs";
 import crypto from "crypto";
 import { execSync } from "child_process";
-import sql from "mssql";
+import fetch from "node-fetch";
 
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
@@ -111,12 +111,10 @@ const CONFIG = {
     secretKey: process.env.BITGET_SECRET_KEY, // reuses same env vars
     baseUrl: "https://api.coinbase.com",
   },
-  azureSQL: {
-    server:   process.env.AZURE_SQL_SERVER,
-    database: process.env.AZURE_SQL_DATABASE,
-    user:     process.env.AZURE_SQL_USER,
-    password: process.env.AZURE_SQL_PASSWORD,
-    enabled:  !!(process.env.AZURE_SQL_SERVER && process.env.AZURE_SQL_DATABASE),
+  azureFn: {
+    url:     process.env.AZURE_FN_URL,
+    key:     process.env.AZURE_FN_KEY,
+    enabled: !!(process.env.AZURE_FN_URL && process.env.AZURE_FN_KEY),
   },
 };
 
@@ -1172,127 +1170,35 @@ async function placeOrder(symbol, side, sizeUSD, price) {
   return placeBitGetOrder(symbol, side, sizeUSD, price);
 }
 
-// ─── Azure SQL Logging ───────────────────────────────────────────────────────
+// ─── Azure Function Logging ──────────────────────────────────────────────────
 
-let sqlPool = null;
+// Batch trades and flush at end of run to minimise HTTP round-trips
+const _sqlBatch = [];
 
-async function getPool() {
-  if (sqlPool) return sqlPool;
-  sqlPool = await sql.connect({
-    server: CONFIG.azureSQL.server,
-    database: CONFIG.azureSQL.database,
-    user: CONFIG.azureSQL.user,
-    password: CONFIG.azureSQL.password,
-    options: { encrypt: true, trustServerCertificate: false },
-    pool: { max: 3, min: 0, idleTimeoutMillis: 30000 },
-  });
-  return sqlPool;
+function queueTradeLog(logEntry) {
+  if (!CONFIG.azureFn.enabled) return;
+  const exchangeName = CONFIG.exchange === "coinbase" ? "Coinbase Advanced" : "BitGet";
+  _sqlBatch.push({ ...logEntry, exchange: exchangeName });
 }
 
-async function initAzureSQL() {
-  if (!CONFIG.azureSQL.enabled) return;
+async function flushTradeLog() {
+  if (!CONFIG.azureFn.enabled || _sqlBatch.length === 0) return;
   try {
-    const pool = await getPool();
-    await pool.request().query(`
-      IF NOT EXISTS (
-        SELECT 1 FROM INFORMATION_SCHEMA.TABLES
-        WHERE TABLE_NAME = 'trades'
-      )
-      CREATE TABLE trades (
-        id            INT IDENTITY(1,1) PRIMARY KEY,
-        trade_date    DATE,
-        trade_time    TIME,
-        exchange      NVARCHAR(50),
-        symbol        NVARCHAR(20),
-        strategy      NVARCHAR(50),
-        signal        NVARCHAR(10),
-        side          NVARCHAR(10),
-        quantity      DECIMAL(18,8),
-        price         DECIMAL(18,2),
-        total_usd     DECIMAL(18,2),
-        fee_est       DECIMAL(18,4),
-        net_amount    DECIMAL(18,2),
-        order_id      NVARCHAR(100),
-        mode          NVARCHAR(20),
-        notes         NVARCHAR(500),
-        created_at    DATETIME2 DEFAULT GETUTCDATE()
-      )
-    `);
-    console.log("  Azure SQL: trades table ready.");
-  } catch (err) {
-    console.warn(`  Azure SQL init failed: ${err.message.split("\n")[0]}`);
-  }
-}
-
-async function logTradeToSQL(logEntry) {
-  if (!CONFIG.azureSQL.enabled) return;
-  try {
-    const pool = await getPool();
-    const now = new Date(logEntry.timestamp);
-
-    let side = null, quantity = null, totalUSD = null, fee = null,
-        netAmount = null, orderId = null, mode, notes;
-
-    if (!logEntry.allPass) {
-      const failed = logEntry.conditions.filter((c) => !c.pass).map((c) => c.label).join("; ");
-      mode = "BLOCKED"; orderId = "BLOCKED";
-      notes = `Failed: ${failed}`;
-    } else if (logEntry.paperTrading) {
-      side = logEntry.signal === "long" ? "BUY" : "SELL";
-      quantity = logEntry.tradeSize / logEntry.price;
-      totalUSD = logEntry.tradeSize;
-      fee = logEntry.tradeSize * 0.001;
-      netAmount = logEntry.tradeSize - fee;
-      orderId = logEntry.orderId || null;
-      mode = "PAPER"; notes = "All conditions met";
+    const url = `${CONFIG.azureFn.url}?code=${encodeURIComponent(CONFIG.azureFn.key)}`;
+    const res = await fetch(url, {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(_sqlBatch),
+    });
+    if (res.ok) {
+      const { inserted } = await res.json();
+      console.log(`  Azure SQL: ${inserted} trade(s) logged via function.`);
     } else {
-      side = logEntry.signal === "long" ? "BUY" : "SELL";
-      quantity = logEntry.tradeSize / logEntry.price;
-      totalUSD = logEntry.tradeSize;
-      fee = logEntry.tradeSize * 0.001;
-      netAmount = logEntry.tradeSize - fee;
-      orderId = logEntry.orderId || null;
-      mode = "LIVE";
-      notes = logEntry.error ? `Error: ${logEntry.error}` : "All conditions met";
+      console.warn(`  Azure Function error: ${res.status} ${await res.text()}`);
     }
-
-    const exchangeName = CONFIG.exchange === "coinbase" ? "Coinbase Advanced" : "BitGet";
-
-    await pool.request()
-      .input("trade_date",  sql.Date,           now)
-      .input("trade_time",  sql.Time,            now)
-      .input("exchange",    sql.NVarChar(50),    exchangeName)
-      .input("symbol",      sql.NVarChar(20),    logEntry.symbol)
-      .input("strategy",    sql.NVarChar(50),    logEntry.strategy)
-      .input("signal",      sql.NVarChar(10),    logEntry.signal)
-      .input("side",        sql.NVarChar(10),    side)
-      .input("quantity",    sql.Decimal(18,8),   quantity)
-      .input("price",       sql.Decimal(18,2),   logEntry.price)
-      .input("total_usd",   sql.Decimal(18,2),   totalUSD)
-      .input("fee_est",     sql.Decimal(18,4),   fee)
-      .input("net_amount",  sql.Decimal(18,2),   netAmount)
-      .input("order_id",    sql.NVarChar(100),   orderId)
-      .input("mode",        sql.NVarChar(20),    mode)
-      .input("notes",       sql.NVarChar(500),   notes)
-      .query(`
-        INSERT INTO trades
-          (trade_date, trade_time, exchange, symbol, strategy, signal,
-           side, quantity, price, total_usd, fee_est, net_amount,
-           order_id, mode, notes)
-        VALUES
-          (@trade_date, @trade_time, @exchange, @symbol, @strategy, @signal,
-           @side, @quantity, @price, @total_usd, @fee_est, @net_amount,
-           @order_id, @mode, @notes)
-      `);
-
-    console.log("  Azure SQL: trade logged.");
   } catch (err) {
-    console.warn(`  Azure SQL insert failed: ${err.message.split("\n")[0]}`);
+    console.warn(`  Azure Function call failed: ${err.message}`);
   }
-}
-
-async function closeSQLPool() {
-  if (sqlPool) { await sql.close(); sqlPool = null; }
 }
 
 // ─── CSV Logging ─────────────────────────────────────────────────────────────
@@ -1549,7 +1455,7 @@ async function processSymbol(symbol, log) {
 
     log.trades.push(logEntry);
     writeTradeCsv(logEntry);
-    await logTradeToSQL(logEntry);
+    queueTradeLog(logEntry);
   }
 }
 
@@ -1567,13 +1473,8 @@ async function run() {
   console.log(`  Assets:   ${CONFIG.symbols.join(", ")}`);
   console.log(`  Active:   ${CONFIG.strategy} (executes orders)`);
   console.log(`  Logging:  all 14 strategies × ${CONFIG.symbols.length} assets → trades.csv + Azure SQL`);
+  if (CONFIG.azureFn.enabled) console.log(`  Azure Fn: ${CONFIG.azureFn.url}`);
   console.log("═══════════════════════════════════════════════════════════");
-
-  if (CONFIG.azureSQL.enabled) {
-    console.log(`\n── Azure SQL ─────────────────────────────────────────────\n`);
-    console.log(`  Server: ${CONFIG.azureSQL.server}`);
-    await initAzureSQL();
-  }
 
   const log = loadLog();
 
@@ -1586,7 +1487,7 @@ async function run() {
   }
 
   saveLog(log);
-  await closeSQLPool();
+  await flushTradeLog();
   console.log(`\nDecision log saved → ${LOG_FILE}`);
   console.log("═══════════════════════════════════════════════════════════\n");
 }

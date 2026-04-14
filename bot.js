@@ -1394,18 +1394,18 @@ async function processSymbol(symbol, log) {
   console.log("\n── Strategy Summary ─────────────────────────────────────\n");
   for (const s of strategies) {
     const icon = s.allPass ? "✅" : "🚫";
-    const exec = s.key === CONFIG.strategy ? " ← active" : "";
+    const exec = CONFIG.strategy === "all" ? " ← all active" : (s.key === CONFIG.strategy ? " ← active" : "");
     console.log(`  ${icon} ${s.name.padEnd(32)} signal=${s.signal.padEnd(5)} ${s.allPass ? "FIRES" : "blocked"}${exec}`);
   }
 
-  const tradeSize    = Math.min(CONFIG.portfolioValue * 0.01, CONFIG.maxTradeSizeUSD);
-  const withinLimits = checkTradeLimits(log, CONFIG.strategy, symbol);
+  const tradeSize = Math.min(CONFIG.portfolioValue * 0.01, CONFIG.maxTradeSizeUSD);
 
   // ── Decisions ─────────────────────────────────────────────────────────────
   console.log("\n── Decisions ────────────────────────────────────────────\n");
 
   for (const s of strategies) {
-    const isActive     = s.key === CONFIG.strategy;
+    const isActive     = CONFIG.strategy === "all" || s.key === CONFIG.strategy;
+    const withinLimits = checkTradeLimits(log, s.key, symbol);
 
     const logEntry = {
       timestamp:    new Date().toISOString(),
@@ -1432,8 +1432,6 @@ async function processSymbol(symbol, log) {
       const failed = s.conditions.filter((c) => !c.pass).map((c) => c.label);
       console.log(`🚫 [${s.name}] ${isActive ? "(active — blocked)" : "(monitoring)"}`);
       failed.forEach((f) => console.log(`   - ${f}`));
-    } else if (!isActive) {
-      console.log(`📊 [${s.name}] SIGNAL fired — logged for comparison`);
     } else if (!withinLimits) {
       console.log(`🚫 [${s.name}] SIGNAL fired but daily limit reached for ${symbol}`);
     } else {
@@ -1477,7 +1475,7 @@ async function run() {
   console.log(`  ${new Date().toISOString()}`);
   console.log(`  Mode:     ${CONFIG.paperTrading ? "📋 PAPER TRADING" : "🔴 LIVE TRADING"}`);
   console.log(`  Assets:   ${CONFIG.symbols.join(", ")}`);
-  console.log(`  Active:   ${CONFIG.strategy} (executes orders)`);
+  console.log(`  Active:   ${CONFIG.strategy === "all" ? "ALL strategies (paper testing mode)" : `${CONFIG.strategy} (executes orders)`}`);
   console.log(`  Logging:  all 14 strategies × ${CONFIG.symbols.length} assets → trades.csv + Azure SQL`);
   if (CONFIG.azureFn.enabled) console.log(`  Azure Fn: ${CONFIG.azureFn.url}`);
   console.log("═══════════════════════════════════════════════════════════");

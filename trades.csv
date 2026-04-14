@@ -8,3 +8,195 @@ Date,Time (UTC),Exchange,Symbol,Strategy,Signal,Side,Quantity,Price,Total USD,Fe
 2026-04-12,11:05:33,BitGet,BTCUSDT,ema_cross,long,,,71447.20,,,,BLOCKED,BLOCKED,"Failed: Fresh crossover this candle"
 2026-04-12,11:05:33,BitGet,BTCUSDT,bb_rsi,none,,,71447.20,,,,BLOCKED,BLOCKED,"Failed: Price at band extreme"
 2026-04-12,11:05:33,BitGet,BTCUSDT,macd,short,,,71447.20,,,,BLOCKED,BLOCKED,"Failed: Fresh bearish crossover"
+2026-04-13,12:25:57,BitGet,BTCUSDT,vwap_scalp,short,,,70890.82,,,,BLOCKED,BLOCKED,"Failed: RSI(3) above 70 (bounce in downtrend)"
+2026-04-13,12:25:57,BitGet,BTCUSDT,ema_cross,short,,,70890.82,,,,BLOCKED,BLOCKED,"Failed: Fresh crossover this candle"
+2026-04-13,12:25:57,BitGet,BTCUSDT,bb_rsi,none,,,70890.82,,,,BLOCKED,BLOCKED,"Failed: Price at band extreme"
+2026-04-13,12:25:57,BitGet,BTCUSDT,macd,short,,,70890.82,,,,BLOCKED,BLOCKED,"Failed: Fresh bearish crossover"
+2026-04-13,12:28:39,Coinbase Advanced,BTCUSDT,vwap_scalp,short,,,70886.42,,,,BLOCKED,BLOCKED,"Failed: RSI(3) above 70 (bounce in downtrend)"
+2026-04-13,12:28:39,Coinbase Advanced,BTCUSDT,ema_cross,short,,,70886.42,,,,BLOCKED,BLOCKED,"Failed: Fresh crossover this candle"
+2026-04-13,12:28:39,Coinbase Advanced,BTCUSDT,bb_rsi,none,,,70886.42,,,,BLOCKED,BLOCKED,"Failed: Price at band extreme"
+2026-04-13,12:28:39,Coinbase Advanced,BTCUSDT,macd,short,,,70886.42,,,,BLOCKED,BLOCKED,"Failed: Fresh bearish crossover"
+2026-04-13,12:32:26,Coinbase Advanced,BTCUSDT,vwap_scalp,short,,,70808.33,,,,BLOCKED,BLOCKED,"Failed: RSI(3) above 70 (bounce in downtrend)"
+2026-04-13,12:32:26,Coinbase Advanced,BTCUSDT,ema_cross,short,,,70808.33,,,,BLOCKED,BLOCKED,"Failed: Fresh crossover this candle"
+2026-04-13,12:32:26,Coinbase Advanced,BTCUSDT,bb_rsi,none,,,70808.33,,,,BLOCKED,BLOCKED,"Failed: Price at band extreme"
+2026-04-13,12:32:26,Coinbase Advanced,BTCUSDT,macd,short,,,70808.33,,,,BLOCKED,BLOCKED,"Failed: Fresh bearish crossover"
+2026-04-13,13:01:48,Coinbase Advanced,BTCUSDT,vwap_scalp,none,,,71110.82,,,,BLOCKED,BLOCKED,"Failed: Market bias"
+2026-04-13,13:01:48,Coinbase Advanced,BTCUSDT,ema_cross,short,,,71110.82,,,,BLOCKED,BLOCKED,"Failed: Fresh crossover this candle"
+2026-04-13,13:01:48,Coinbase Advanced,BTCUSDT,bb_rsi,none,,,71110.82,,,,BLOCKED,BLOCKED,"Failed: Price at band extreme"
+2026-04-13,13:01:48,Coinbase Advanced,BTCUSDT,macd,short,,,71110.82,,,,BLOCKED,BLOCKED,"Failed: Fresh bearish crossover"
+2026-04-13,13:17:11,Coinbase Advanced,BTCUSDT,vwap_scalp,none,,,71147.78,,,,BLOCKED,BLOCKED,Failed: Market bias
+2026-04-13,13:17:11,Coinbase Advanced,BTCUSDT,ema_cross,short,,,71147.78,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:17:11,Coinbase Advanced,BTCUSDT,bb_rsi,none,,,71147.78,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:17:12,Coinbase Advanced,BTCUSDT,macd,short,,,71147.78,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:21:12,Coinbase Advanced,BTCUSDT,vwap_scalp,none,,,71153.73,,,,BLOCKED,BLOCKED,Failed: Market bias
+2026-04-13,13:21:12,Coinbase Advanced,BTCUSDT,ema_cross,short,,,71153.73,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:21:12,Coinbase Advanced,BTCUSDT,bb_rsi,none,,,71153.73,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:21:12,Coinbase Advanced,BTCUSDT,macd,short,,,71153.73,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,vwap_scalp,none,,,71052.99,,,,BLOCKED,BLOCKED,Failed: Market bias
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,ema_cross,short,,,71052.99,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,bb_rsi,none,,,71052.99,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,macd,short,,,71052.99,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,stoch_rsi,long,BUY,0.000141,71052.99,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,supertrend,short,SELL,0.000141,71052.99,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,ichimoku,long,,,71052.99,,,,BLOCKED,BLOCKED,Failed: Tenkan above Kijun (bullish cross)
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,rsi_divergence,short,,,71052.99,,,,BLOCKED,BLOCKED,Failed: RSI not deeply oversold (valid bearish)
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,adx,short,,,71052.99,,,,BLOCKED,BLOCKED,Failed: -DI clearly dominant (> 5 spread)
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,ema_3,none,,,71052.99,,,,BLOCKED,BLOCKED,Failed: EMA stack aligned
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,heikin_ashi,none,,,71052.99,,,,BLOCKED,BLOCKED,Failed: 3 consecutive HA candles
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,orb,none,,,71052.99,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,support_resistance,long,BUY,0.000141,71052.99,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:36:23,Coinbase Advanced,BTCUSDT,volume_profile,none,,,71052.99,,,,BLOCKED,BLOCKED,Failed: Price at Value Area edge
+2026-04-13,13:37:20,Coinbase Advanced,BTCUSDT,vwap_scalp,none,,,71007.44,,,,BLOCKED,BLOCKED,Failed: Market bias
+2026-04-13,13:37:20,Coinbase Advanced,BTCUSDT,ema_cross,short,,,71007.44,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:20,Coinbase Advanced,BTCUSDT,bb_rsi,none,,,71007.44,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:20,Coinbase Advanced,BTCUSDT,macd,short,,,71007.44,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:20,Coinbase Advanced,BTCUSDT,stoch_rsi,long,BUY,0.000141,71007.44,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:20,Coinbase Advanced,BTCUSDT,supertrend,short,SELL,0.000141,71007.44,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,ichimoku,long,,,71007.44,,,,BLOCKED,BLOCKED,Failed: Tenkan above Kijun (bullish cross)
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,rsi_divergence,short,,,71007.44,,,,BLOCKED,BLOCKED,Failed: RSI not deeply oversold (valid bearish)
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,adx,short,,,71007.44,,,,BLOCKED,BLOCKED,Failed: -DI clearly dominant (> 5 spread)
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,ema_3,none,,,71007.44,,,,BLOCKED,BLOCKED,Failed: EMA stack aligned
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,heikin_ashi,none,,,71007.44,,,,BLOCKED,BLOCKED,Failed: 3 consecutive HA candles
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,orb,none,,,71007.44,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,support_resistance,long,BUY,0.000141,71007.44,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:21,Coinbase Advanced,BTCUSDT,volume_profile,none,,,71007.44,,,,BLOCKED,BLOCKED,Failed: Price at Value Area edge
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,vwap_scalp,short,,,2188.64,,,,BLOCKED,BLOCKED,Failed: RSI(3) above 70 (bounce in downtrend)
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,ema_cross,short,,,2188.64,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,bb_rsi,none,,,2188.64,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,macd,short,,,2188.64,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,stoch_rsi,long,,,2188.64,,,,BLOCKED,BLOCKED,Failed: K crossing above D (momentum turning up)
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,supertrend,long,BUY,0.004569,2188.64,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,ichimoku,long,,,2188.64,,,,BLOCKED,BLOCKED,Failed: Tenkan above Kijun (bullish cross)
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,rsi_divergence,none,,,2188.64,,,,BLOCKED,BLOCKED,Failed: Divergence detected
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,adx,long,,,2188.64,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25); +DI clearly dominant (> 5 spread)
+2026-04-13,13:37:21,Coinbase Advanced,ETHUSDT,ema_3,none,,,2188.64,,,,BLOCKED,BLOCKED,Failed: EMA stack aligned
+2026-04-13,13:37:22,Coinbase Advanced,ETHUSDT,heikin_ashi,short,,,2188.64,,,,BLOCKED,BLOCKED,"Failed: No upper wicks (strong sellers, no pullback)"
+2026-04-13,13:37:22,Coinbase Advanced,ETHUSDT,orb,none,,,2188.64,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:22,Coinbase Advanced,ETHUSDT,support_resistance,none,,,2188.64,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:22,Coinbase Advanced,ETHUSDT,volume_profile,none,,,2188.64,,,,BLOCKED,BLOCKED,Failed: Price at Value Area edge
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,vwap_scalp,long,,,82.39,,,,BLOCKED,BLOCKED,Failed: RSI(3) below 30 (pullback in uptrend)
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,ema_cross,short,,,82.39,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,bb_rsi,none,,,82.39,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,macd,short,,,82.39,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,stoch_rsi,long,BUY,0.121374,82.39,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,supertrend,long,BUY,0.121374,82.39,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,ichimoku,none,,,82.39,,,,BLOCKED,BLOCKED,Failed: Price outside cloud
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,rsi_divergence,none,,,82.39,,,,BLOCKED,BLOCKED,Failed: Divergence detected
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,adx,long,,,82.39,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25); +DI clearly dominant (> 5 spread)
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,ema_3,none,,,82.39,,,,BLOCKED,BLOCKED,Failed: EMA stack aligned
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,heikin_ashi,long,,,82.39,,,,BLOCKED,BLOCKED,"Failed: No lower wicks (strong buyers, no pullback)"
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,orb,none,,,82.39,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,support_resistance,none,,,82.39,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:22,Coinbase Advanced,SOLUSDT,volume_profile,none,,,82.39,,,,BLOCKED,BLOCKED,Failed: Price at Value Area edge
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,vwap_scalp,none,,,596.53,,,,BLOCKED,BLOCKED,Failed: Market bias
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,ema_cross,short,,,596.53,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,bb_rsi,none,,,596.53,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,macd,short,,,596.53,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,stoch_rsi,long,,,596.53,,,,BLOCKED,BLOCKED,Failed: StochRSI K oversold (below 20)
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,supertrend,short,SELL,0.016764,596.53,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,ichimoku,short,SELL,0.016764,596.53,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,rsi_divergence,long,BUY,0.016764,596.53,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,adx,long,,,596.53,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25); +DI clearly dominant (> 5 spread)
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,ema_3,short,SELL,0.016764,596.53,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,heikin_ashi,long,BUY,0.016764,596.53,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,orb,none,,,596.53,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,support_resistance,none,,,596.53,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:23,Coinbase Advanced,BNBUSDT,volume_profile,none,,,596.53,,,,BLOCKED,BLOCKED,Failed: Price at Value Area edge
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,vwap_scalp,long,,,1.33,,,,BLOCKED,BLOCKED,Failed: RSI(3) below 30 (pullback in uptrend)
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,ema_cross,short,,,1.33,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,bb_rsi,none,,,1.33,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,macd,short,,,1.33,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,stoch_rsi,long,BUY,7.522190,1.33,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,supertrend,long,BUY,7.522190,1.33,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,ichimoku,short,SELL,7.522190,1.33,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,rsi_divergence,long,BUY,7.522190,1.33,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,adx,long,,,1.33,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25); +DI clearly dominant (> 5 spread)
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,ema_3,short,SELL,7.522190,1.33,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,heikin_ashi,none,,,1.33,,,,BLOCKED,BLOCKED,Failed: 3 consecutive HA candles
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,orb,none,,,1.33,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,support_resistance,long,BUY,7.522190,1.33,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:24,Coinbase Advanced,XRPUSDT,volume_profile,long,,,1.33,,,,BLOCKED,BLOCKED,Failed: RSI oversold (< 40) — confirms weakness exhausted
+2026-04-13,13:37:24,Coinbase Advanced,ADAUSDT,vwap_scalp,none,,,0.24,,,,BLOCKED,BLOCKED,Failed: Market bias
+2026-04-13,13:37:24,Coinbase Advanced,ADAUSDT,ema_cross,short,,,0.24,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,bb_rsi,none,,,0.24,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,macd,short,,,0.24,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,stoch_rsi,long,BUY,41.753653,0.24,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,supertrend,short,,,0.24,,,,BLOCKED,BLOCKED,Failed: Price within 3% of Supertrend (fresh signal)
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,ichimoku,short,SELL,41.753653,0.24,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,rsi_divergence,none,,,0.24,,,,BLOCKED,BLOCKED,Failed: Divergence detected
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,adx,short,,,0.24,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25); -DI clearly dominant (> 5 spread)
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,ema_3,short,,,0.24,,,,BLOCKED,BLOCKED,Failed: Price near EMA(21) — pullback entry
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,heikin_ashi,long,,,0.24,,,,BLOCKED,BLOCKED,"Failed: No lower wicks (strong buyers, no pullback)"
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,orb,long,BUY,41.753653,0.24,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,support_resistance,none,,,0.24,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:25,Coinbase Advanced,ADAUSDT,volume_profile,long,BUY,41.753653,0.24,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:25,Coinbase Advanced,AVAXUSDT,vwap_scalp,long,,,9.13,,,,BLOCKED,BLOCKED,Failed: RSI(3) below 30 (pullback in uptrend)
+2026-04-13,13:37:25,Coinbase Advanced,AVAXUSDT,ema_cross,short,,,9.13,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:25,Coinbase Advanced,AVAXUSDT,bb_rsi,none,,,9.13,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:25,Coinbase Advanced,AVAXUSDT,macd,short,,,9.13,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:25,Coinbase Advanced,AVAXUSDT,stoch_rsi,long,BUY,1.095290,9.13,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:25,Coinbase Advanced,AVAXUSDT,supertrend,long,BUY,1.095290,9.13,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:25,Coinbase Advanced,AVAXUSDT,ichimoku,long,,,9.13,,,,BLOCKED,BLOCKED,Failed: Tenkan above Kijun (bullish cross)
+2026-04-13,13:37:26,Coinbase Advanced,AVAXUSDT,rsi_divergence,short,SELL,1.095290,9.13,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:26,Coinbase Advanced,AVAXUSDT,adx,long,,,9.13,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25)
+2026-04-13,13:37:26,Coinbase Advanced,AVAXUSDT,ema_3,none,,,9.13,,,,BLOCKED,BLOCKED,Failed: EMA stack aligned
+2026-04-13,13:37:26,Coinbase Advanced,AVAXUSDT,heikin_ashi,none,,,9.13,,,,BLOCKED,BLOCKED,Failed: 3 consecutive HA candles
+2026-04-13,13:37:26,Coinbase Advanced,AVAXUSDT,orb,none,,,9.13,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:26,Coinbase Advanced,AVAXUSDT,support_resistance,none,,,9.13,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:26,Coinbase Advanced,AVAXUSDT,volume_profile,none,,,9.13,,,,BLOCKED,BLOCKED,Failed: Price at Value Area edge
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,vwap_scalp,short,,,0.09,,,,BLOCKED,BLOCKED,Failed: RSI(3) above 70 (bounce in downtrend)
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,ema_cross,short,,,0.09,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,bb_rsi,none,,,0.09,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,macd,short,,,0.09,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,stoch_rsi,long,BUY,109.817703,0.09,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,supertrend,long,BUY,109.817703,0.09,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,ichimoku,short,SELL,109.817703,0.09,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,rsi_divergence,none,,,0.09,,,,BLOCKED,BLOCKED,Failed: Divergence detected
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,adx,long,,,0.09,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25)
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,ema_3,short,SELL,109.817703,0.09,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,heikin_ashi,none,,,0.09,,,,BLOCKED,BLOCKED,Failed: 3 consecutive HA candles
+2026-04-13,13:37:26,Coinbase Advanced,DOGEUSDT,orb,none,,,0.09,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:27,Coinbase Advanced,DOGEUSDT,support_resistance,long,BUY,109.817703,0.09,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:27,Coinbase Advanced,DOGEUSDT,volume_profile,long,BUY,109.817703,0.09,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,vwap_scalp,short,,,8.74,,,,BLOCKED,BLOCKED,Failed: RSI(3) above 70 (bounce in downtrend)
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,ema_cross,short,,,8.74,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,bb_rsi,none,,,8.74,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,macd,short,,,8.74,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,stoch_rsi,long,BUY,1.144165,8.74,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,supertrend,long,BUY,1.144165,8.74,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,ichimoku,short,SELL,1.144165,8.74,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,rsi_divergence,none,,,8.74,,,,BLOCKED,BLOCKED,Failed: Divergence detected
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,adx,long,,,8.74,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25); +DI clearly dominant (> 5 spread)
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,ema_3,short,,,8.74,,,,BLOCKED,BLOCKED,Failed: Price near EMA(21) — pullback entry
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,heikin_ashi,short,,,8.74,,,,BLOCKED,BLOCKED,"Failed: No upper wicks (strong sellers, no pullback)"
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,orb,none,,,8.74,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,support_resistance,none,,,8.74,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:27,Coinbase Advanced,LINKUSDT,volume_profile,none,,,8.74,,,,BLOCKED,BLOCKED,Failed: Price at Value Area edge
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,vwap_scalp,short,,,1.17,,,,BLOCKED,BLOCKED,Failed: RSI(3) above 70 (bounce in downtrend); Price within 1.5% of VWAP (not overextended)
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,ema_cross,short,,,1.17,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle; RSI(14) above 30 (not oversold)
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,bb_rsi,none,,,1.17,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,macd,short,,,1.17,,,,BLOCKED,BLOCKED,Failed: Fresh bearish crossover
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,stoch_rsi,long,,,1.17,,,,BLOCKED,BLOCKED,Failed: K crossing above D (momentum turning up)
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,supertrend,short,,,1.17,,,,BLOCKED,BLOCKED,Failed: Price within 3% of Supertrend (fresh signal)
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,ichimoku,short,SELL,8.576329,1.17,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,rsi_divergence,none,,,1.17,,,,BLOCKED,BLOCKED,Failed: Divergence detected
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,adx,short,,,1.17,,,,BLOCKED,BLOCKED,Failed: ADX shows strong trend (> 25)
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,ema_3,short,,,1.17,,,,BLOCKED,BLOCKED,Failed: Price near EMA(21) — pullback entry
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,heikin_ashi,short,SELL,8.576329,1.17,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,orb,short,,,1.17,,,,BLOCKED,BLOCKED,Failed: Breakout within 2% (not too extended)
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,support_resistance,none,,,1.17,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:28,Coinbase Advanced,DOTUSDT,volume_profile,long,BUY,8.576329,1.17,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,vwap_scalp,long,,,261.60,,,,BLOCKED,BLOCKED,Failed: RSI(3) below 30 (pullback in uptrend)
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,ema_cross,short,,,261.60,,,,BLOCKED,BLOCKED,Failed: Fresh crossover this candle
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,bb_rsi,none,,,261.60,,,,BLOCKED,BLOCKED,Failed: Price at band extreme
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,macd,long,,,261.60,,,,BLOCKED,BLOCKED,Failed: Fresh bullish crossover
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,stoch_rsi,short,,,261.60,,,,BLOCKED,BLOCKED,Failed: K crossing below D (momentum turning down)
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,supertrend,short,,,261.60,,,,BLOCKED,BLOCKED,Failed: Price within 3% of Supertrend (fresh signal)
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,ichimoku,short,SELL,0.038226,261.60,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,rsi_divergence,none,,,261.60,,,,BLOCKED,BLOCKED,Failed: Divergence detected
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,adx,short,SELL,0.038226,261.60,10.00,0.0100,9.99,,PAPER,All conditions met
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,ema_3,short,,,261.60,,,,BLOCKED,BLOCKED,Failed: Price near EMA(21) — pullback entry
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,heikin_ashi,none,,,261.60,,,,BLOCKED,BLOCKED,Failed: 3 consecutive HA candles
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,orb,none,,,261.60,,,,BLOCKED,BLOCKED,Failed: ORB breakout
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,support_resistance,none,,,261.60,,,,BLOCKED,BLOCKED,Failed: Price at key level
+2026-04-13,13:37:29,Coinbase Advanced,TAOUSDT,volume_profile,long,,,261.60,,,,BLOCKED,BLOCKED,Failed: RSI oversold (< 40) — confirms weakness exhausted

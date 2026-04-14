@@ -9,11 +9,43 @@ const sqlConfig = {
   options:  { encrypt: true, trustServerCertificate: false },
 };
 
+// Azure SQL serverless auto-pauses after inactivity and takes 30-90s to wake.
+// Retry with backoff until the database responds.
+const WAKE_RETRIES = 10;
+const WAKE_DELAY_MS = 10000; // 10s between retries = up to 100s total
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+function isPauseError(err) {
+  const msg = err.message || "";
+  return (
+    msg.includes("not currently available") ||
+    msg.includes("is paused") ||
+    msg.includes("40613") ||
+    msg.includes("40197") ||
+    msg.includes("timeout") ||
+    err.code === "ETIMEOUT" ||
+    err.code === "ESOCKET"
+  );
+}
+
 let pool = null;
 async function getPool() {
   if (pool) return pool;
-  pool = await sql.connect(sqlConfig);
-  return pool;
+  for (let attempt = 1; attempt <= WAKE_RETRIES; attempt++) {
+    try {
+      pool = await sql.connect(sqlConfig);
+      return pool;
+    } catch (err) {
+      pool = null;
+      if (attempt < WAKE_RETRIES && isPauseError(err)) {
+        console.log(`  DB waking up (attempt ${attempt}/${WAKE_RETRIES}) — retrying in ${WAKE_DELAY_MS / 1000}s...`);
+        await sleep(WAKE_DELAY_MS);
+      } else {
+        throw err;
+      }
+    }
+  }
 }
 
 app.http("logTrade", {

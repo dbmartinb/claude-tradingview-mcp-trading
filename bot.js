@@ -1194,6 +1194,7 @@ async function flushTradeLog() {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify(_sqlBatch),
+      signal:  AbortSignal.timeout(120000), // 2 min — allows DB wake-up time
     });
     if (res.ok) {
       const { inserted } = await res.json();

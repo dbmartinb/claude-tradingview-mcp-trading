@@ -35,6 +35,10 @@ import fetch from "node-fetch";
 // ─── Onboarding ───────────────────────────────────────────────────────────────
 
 function checkOnboarding() {
+  // Skip onboarding checks when running in cloud (env vars set directly)
+  const isCloud = !!(process.env.RAILWAY_ENVIRONMENT || process.env.WEBSITE_INSTANCE_ID);
+  if (isCloud) return;
+
   const required = ["BITGET_API_KEY", "BITGET_SECRET_KEY"];
   const missing = required.filter((k) => !process.env[k]);
 

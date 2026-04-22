@@ -862,10 +862,9 @@ async function flushTradeLog() {
   console.log(`  Azure Fn: enabled=${CONFIG.azureFn.enabled}, batch=${_sqlBatch.length} trades`);
   if (!CONFIG.azureFn.enabled || _sqlBatch.length === 0) return;
   try {
-    const url = `${CONFIG.azureFn.url}?code=${encodeURIComponent(CONFIG.azureFn.key)}`;
-    const res = await fetch(url, {
+    const res = await fetch(CONFIG.azureFn.url, {
       method:  "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "x-functions-key": CONFIG.azureFn.key },
       body:    JSON.stringify(_sqlBatch),
       signal:  AbortSignal.timeout(120000), // 2 min — allows DB wake-up time
     });

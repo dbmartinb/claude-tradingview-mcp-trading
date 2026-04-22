@@ -629,277 +629,14 @@ function evalVWAPScalp(price, ema8, vwap, rsi3) {
   return { key: "vwap_scalp", name: "VWAP + RSI(3) + EMA(8)", signal, conditions, allPass: conditions.every((c) => c.pass) };
 }
 
-// ── Strategy 2: EMA(9/21) Crossover ──────────────────────────────────────────
-// Fires when the fast EMA(9) crosses the slow EMA(21). Classic trend-following.
-// Requires a fresh cross on this candle — avoids re-entering an established trend.
-function evalEMACross(price, ema9, ema21, prevEma9, prevEma21, rsi14) {
-  const conditions = [];
-  let signal = "none";
-
-  const aboveEMA = ema9 > ema21;
-  const freshLongCross = prevEma9 <= prevEma21 && ema9 > ema21;
-  const freshShortCross = prevEma9 >= prevEma21 && ema9 < ema21;
-
-  console.log("\n── Strategy 2: EMA(9/21) Crossover ─────────────────────\n");
-
-  if (aboveEMA) {
-    console.log(`  Bias: BULLISH (EMA9 ${ema9.toFixed(2)} > EMA21 ${ema21.toFixed(2)})\n`);
-    signal = "long";
-    conditions.push(condition("EMA(9) above EMA(21) (uptrend)", `> ${ema21.toFixed(2)}`, ema9.toFixed(2), aboveEMA));
-    conditions.push(condition("Fresh crossover this candle", `prev EMA9 ≤ EMA21`, `${prevEma9.toFixed(2)} vs ${prevEma21.toFixed(2)}`, freshLongCross));
-    conditions.push(condition("RSI(14) below 70 (not overbought)", "< 70", rsi14.toFixed(2), rsi14 < 70));
-  } else {
-    console.log(`  Bias: BEARISH (EMA9 ${ema9.toFixed(2)} < EMA21 ${ema21.toFixed(2)})\n`);
-    signal = "short";
-    conditions.push(condition("EMA(9) below EMA(21) (downtrend)", `< ${ema21.toFixed(2)}`, ema9.toFixed(2), !aboveEMA));
-    conditions.push(condition("Fresh crossover this candle", `prev EMA9 ≥ EMA21`, `${prevEma9.toFixed(2)} vs ${prevEma21.toFixed(2)}`, freshShortCross));
-    conditions.push(condition("RSI(14) above 30 (not oversold)", "> 30", rsi14.toFixed(2), rsi14 > 30));
-  }
-
-  return { key: "ema_cross", name: "EMA(9/21) Crossover", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 3: Bollinger Bands + RSI(14) ────────────────────────────────────
-// Mean reversion. Price touches the outer band = stretched too far, likely to snap back.
-// RSI confirms the stretch. Works best in ranging/sideways markets.
-function evalBBRSI(price, bb, rsi14) {
-  const conditions = [];
-  let signal = "none";
-
-  const atLowerBand = price <= bb.lower * 1.002;  // within 0.2% of lower band
-  const atUpperBand = price >= bb.upper * 0.998;
-  const bandWidth = ((bb.upper - bb.lower) / bb.middle) * 100;
-
-  console.log("\n── Strategy 3: Bollinger Bands + RSI(14) ────────────────\n");
-
-  if (atLowerBand) {
-    console.log("  Bias: BULLISH (price at lower band)\n");
-    signal = "long";
-    conditions.push(condition("Price at lower Bollinger Band", `≤ ${bb.lower.toFixed(2)}`, price.toFixed(2), atLowerBand));
-    conditions.push(condition("RSI(14) oversold (below 35)", "< 35", rsi14.toFixed(2), rsi14 < 35));
-    conditions.push(condition("Bands wide enough to trade (>1%)", "> 1%", `${bandWidth.toFixed(2)}%`, bandWidth > 1));
-  } else if (atUpperBand) {
-    console.log("  Bias: BEARISH (price at upper band)\n");
-    signal = "short";
-    conditions.push(condition("Price at upper Bollinger Band", `≥ ${bb.upper.toFixed(2)}`, price.toFixed(2), atUpperBand));
-    conditions.push(condition("RSI(14) overbought (above 65)", "> 65", rsi14.toFixed(2), rsi14 > 65));
-    conditions.push(condition("Bands wide enough to trade (>1%)", "> 1%", `${bandWidth.toFixed(2)}%`, bandWidth > 1));
-  } else {
-    console.log("  Bias: NEUTRAL — price mid-range, not at a band.\n");
-    conditions.push({ label: "Price at band extreme", required: "At upper or lower band", actual: "Mid-range", pass: false });
-  }
-
-  return { key: "bb_rsi", name: "Bollinger Bands + RSI(14)", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 4: MACD Crossover (12/26/9) ─────────────────────────────────────
-// Momentum shift. When the MACD line crosses the signal line, momentum is changing.
-// Fresh cross only — don't enter after the move has already started.
-function evalMACD(macdData) {
-  const conditions = [];
-  let signal = "none";
-
-  const aboveSignal = macdData.macd > macdData.signal;
-  const freshBullishCross = macdData.prevMACD <= macdData.prevSignal && macdData.macd > macdData.signal;
-  const freshBearishCross = macdData.prevMACD >= macdData.prevSignal && macdData.macd < macdData.signal;
-
-  console.log("\n── Strategy 4: MACD Crossover (12/26/9) ─────────────────\n");
-
-  if (aboveSignal) {
-    console.log("  Bias: BULLISH\n");
-    signal = "long";
-    conditions.push(condition("MACD above signal line", `> ${macdData.signal.toFixed(4)}`, macdData.macd.toFixed(4), aboveSignal));
-    conditions.push(condition("Fresh bullish crossover", "prev MACD ≤ Signal", freshBullishCross ? "YES (fresh)" : "NO (already crossed)", freshBullishCross));
-  } else {
-    console.log("  Bias: BEARISH\n");
-    signal = "short";
-    conditions.push(condition("MACD below signal line", `< ${macdData.signal.toFixed(4)}`, macdData.macd.toFixed(4), !aboveSignal));
-    conditions.push(condition("Fresh bearish crossover", "prev MACD ≥ Signal", freshBearishCross ? "YES (fresh)" : "NO (already crossed)", freshBearishCross));
-  }
-
-  return { key: "macd", name: "MACD Crossover (12/26/9)", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 5: Stochastic RSI ───────────────────────────────────────────────
-// K < 20 crossing above D = oversold recovery (long). K > 80 crossing below D = overbought reversal (short).
-function evalStochRSI(stochRSI) {
-  const conditions = [];
-  let signal = "none";
-  const { k, d, prevK } = stochRSI;
-
-  console.log("\n── Strategy 5: Stochastic RSI ───────────────────────────\n");
-
-  if (k < 50) {
-    console.log(`  Bias: BULLISH SETUP (K=${k.toFixed(2)} below midline)\n`);
-    signal = "long";
-    conditions.push(condition("StochRSI K oversold (below 20)", "< 20", k.toFixed(2), k < 20));
-    conditions.push(condition("K crossing above D (momentum turning up)", `D=${d.toFixed(2)}`, `K=${k.toFixed(2)}`, k > d && prevK <= d));
-    conditions.push(condition("K below 50 (not already extended)", "< 50", k.toFixed(2), k < 50));
-  } else {
-    console.log(`  Bias: BEARISH SETUP (K=${k.toFixed(2)} above midline)\n`);
-    signal = "short";
-    conditions.push(condition("StochRSI K overbought (above 80)", "> 80", k.toFixed(2), k > 80));
-    conditions.push(condition("K crossing below D (momentum turning down)", `D=${d.toFixed(2)}`, `K=${k.toFixed(2)}`, k < d && prevK >= d));
-    conditions.push(condition("K above 50 (not already extended)", "> 50", k.toFixed(2), k > 50));
-  }
-
-  return { key: "stoch_rsi", name: "Stochastic RSI", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 6: Supertrend ────────────────────────────────────────────────────
-// Price above Supertrend line = bullish. Price below = bearish. Direction change = entry.
-function evalSupertrend(price, supertrend) {
-  const conditions = [];
-  const { value, direction } = supertrend;
-  let signal = "none";
-
-  console.log("\n── Strategy 6: Supertrend (ATR 10, mult 3.0) ────────────\n");
-
-  if (direction === 1) {
-    console.log(`  Bias: BULLISH (price above Supertrend)\n`);
-    signal = "long";
-    conditions.push(condition("Price above Supertrend line (uptrend)", `> ${value.toFixed(2)}`, price.toFixed(2), price > value));
-    conditions.push(condition("Supertrend direction is bullish", "= 1", String(direction), direction === 1));
-    const dist = ((price - value) / price) * 100;
-    conditions.push(condition("Price within 3% of Supertrend (fresh signal)", "< 3%", `${dist.toFixed(2)}%`, dist < 3));
-  } else {
-    console.log(`  Bias: BEARISH (price below Supertrend)\n`);
-    signal = "short";
-    conditions.push(condition("Price below Supertrend line (downtrend)", `< ${value.toFixed(2)}`, price.toFixed(2), price < value));
-    conditions.push(condition("Supertrend direction is bearish", "= -1", String(direction), direction === -1));
-    const dist = ((value - price) / price) * 100;
-    conditions.push(condition("Price within 3% of Supertrend (fresh signal)", "< 3%", `${dist.toFixed(2)}%`, dist < 3));
-  }
-
-  return { key: "supertrend", name: "Supertrend", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 7: Ichimoku Cloud ────────────────────────────────────────────────
-// Strong signal: price above/below cloud, Tenkan/Kijun aligned, Chikou confirms.
-function evalIchimoku(price, ichimoku) {
-  const { tenkan, kijun, cloudTop, cloudBottom, chikou, priceAgo } = ichimoku;
-  const conditions = [];
-  let signal = "none";
-
-  console.log("\n── Strategy 7: Ichimoku Cloud ───────────────────────────\n");
-
-  const aboveCloud = price > cloudTop;
-  const belowCloud = price < cloudBottom;
-
-  if (aboveCloud) {
-    console.log(`  Bias: BULLISH (price above cloud)\n`);
-    signal = "long";
-    conditions.push(condition("Price above cloud top", `> ${cloudTop.toFixed(2)}`, price.toFixed(2), aboveCloud));
-    conditions.push(condition("Tenkan above Kijun (bullish cross)", `> ${kijun.toFixed(2)}`, tenkan.toFixed(2), tenkan > kijun));
-    conditions.push(condition("Chikou above price from 26 periods ago", `> ${priceAgo?.toFixed(2) ?? "N/A"}`, chikou.toFixed(2), priceAgo !== null && chikou > priceAgo));
-  } else if (belowCloud) {
-    console.log(`  Bias: BEARISH (price below cloud)\n`);
-    signal = "short";
-    conditions.push(condition("Price below cloud bottom", `< ${cloudBottom.toFixed(2)}`, price.toFixed(2), belowCloud));
-    conditions.push(condition("Tenkan below Kijun (bearish cross)", `< ${kijun.toFixed(2)}`, tenkan.toFixed(2), tenkan < kijun));
-    conditions.push(condition("Chikou below price from 26 periods ago", `< ${priceAgo?.toFixed(2) ?? "N/A"}`, chikou.toFixed(2), priceAgo !== null && chikou < priceAgo));
-  } else {
-    console.log("  Bias: NEUTRAL — price inside cloud.\n");
-    conditions.push({ label: "Price outside cloud", required: "Above or below cloud", actual: "Inside cloud", pass: false });
-  }
-
-  return { key: "ichimoku", name: "Ichimoku Cloud", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 8: RSI Divergence ────────────────────────────────────────────────
-// Price and RSI moving in opposite directions — signals upcoming reversal.
-function evalRSIDivergence(divergence, rsi14) {
-  const { bullish, bearish } = divergence;
-  const conditions = [];
-  let signal = "none";
-
-  console.log("\n── Strategy 8: RSI Divergence ───────────────────────────\n");
-
-  if (bearish) {
-    console.log("  Bias: BEARISH DIVERGENCE (price higher high, RSI lower high)\n");
-    signal = "short";
-    conditions.push(condition("Bearish divergence detected", "price HH + RSI LH", "YES", bearish));
-    conditions.push(condition("RSI not deeply oversold (valid bearish)", "> 40", rsi14.toFixed(2), rsi14 > 40));
-  } else if (bullish) {
-    console.log("  Bias: BULLISH DIVERGENCE (price lower low, RSI higher low)\n");
-    signal = "long";
-    conditions.push(condition("Bullish divergence detected", "price LL + RSI HL", "YES", bullish));
-    conditions.push(condition("RSI not deeply overbought (valid bullish)", "< 60", rsi14.toFixed(2), rsi14 < 60));
-  } else {
-    console.log("  Bias: NEUTRAL — no divergence detected.\n");
-    conditions.push({ label: "Divergence detected", required: "Bullish or bearish divergence", actual: "None", pass: false });
-  }
-
-  return { key: "rsi_divergence", name: "RSI Divergence", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 9: ADX Trend Strength ───────────────────────────────────────────
-// Only trades when ADX > 25 (strong trend). Direction from +DI vs -DI.
-function evalADX(adxData) {
-  const { adx, plusDI, minusDI } = adxData;
-  const conditions = [];
-  let signal = "none";
-
-  console.log("\n── Strategy 9: ADX Trend Strength ──────────────────────\n");
-
-  if (plusDI > minusDI) {
-    console.log(`  Bias: BULLISH (+DI ${plusDI.toFixed(2)} > -DI ${minusDI.toFixed(2)})\n`);
-    signal = "long";
-    conditions.push(condition("ADX shows strong trend (> 25)", "> 25", adx.toFixed(2), adx > 25));
-    conditions.push(condition("+DI above -DI (bullish pressure)", `> ${minusDI.toFixed(2)}`, plusDI.toFixed(2), plusDI > minusDI));
-    conditions.push(condition("+DI clearly dominant (> 5 spread)", "> 5 spread", (plusDI - minusDI).toFixed(2), plusDI - minusDI > 5));
-  } else {
-    console.log(`  Bias: BEARISH (-DI ${minusDI.toFixed(2)} > +DI ${plusDI.toFixed(2)})\n`);
-    signal = "short";
-    conditions.push(condition("ADX shows strong trend (> 25)", "> 25", adx.toFixed(2), adx > 25));
-    conditions.push(condition("-DI above +DI (bearish pressure)", `> ${plusDI.toFixed(2)}`, minusDI.toFixed(2), minusDI > plusDI));
-    conditions.push(condition("-DI clearly dominant (> 5 spread)", "> 5 spread", (minusDI - plusDI).toFixed(2), minusDI - plusDI > 5));
-  }
-
-  return { key: "adx", name: "ADX Trend Strength", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 10: 3-EMA System ─────────────────────────────────────────────────
-// All three EMAs stacked in order = clean trend. Entry on pullback to middle EMA.
-function evalThreeEMA(price, ema8, ema21, ema50) {
-  const conditions = [];
-  let signal = "none";
-
-  console.log("\n── Strategy 10: 3-EMA System (8/21/50) ─────────────────\n");
-
-  const bullStack = ema8 > ema21 && ema21 > ema50;
-  const bearStack = ema8 < ema21 && ema21 < ema50;
-
-  if (bullStack) {
-    console.log(`  Bias: BULLISH (EMA8 > EMA21 > EMA50)\n`);
-    signal = "long";
-    conditions.push(condition("EMA(8) > EMA(21) > EMA(50) stacked bullish", `${ema21.toFixed(2)} < ${ema8.toFixed(2)}`, `EMA50=${ema50.toFixed(2)}`, bullStack));
-    const distToEma21 = ((price - ema21) / price) * 100;
-    conditions.push(condition("Price near EMA(21) — pullback entry", "within 1%", `${distToEma21.toFixed(2)}%`, Math.abs(distToEma21) < 1));
-    conditions.push(condition("Price above EMA(50) — in uptrend zone", `> ${ema50.toFixed(2)}`, price.toFixed(2), price > ema50));
-  } else if (bearStack) {
-    console.log(`  Bias: BEARISH (EMA8 < EMA21 < EMA50)\n`);
-    signal = "short";
-    conditions.push(condition("EMA(8) < EMA(21) < EMA(50) stacked bearish", `${ema21.toFixed(2)} > ${ema8.toFixed(2)}`, `EMA50=${ema50.toFixed(2)}`, bearStack));
-    const distToEma21 = ((ema21 - price) / price) * 100;
-    conditions.push(condition("Price near EMA(21) — pullback entry", "within 1%", `${distToEma21.toFixed(2)}%`, Math.abs(distToEma21) < 1));
-    conditions.push(condition("Price below EMA(50) — in downtrend zone", `< ${ema50.toFixed(2)}`, price.toFixed(2), price < ema50));
-  } else {
-    console.log("  Bias: NEUTRAL — EMAs not stacked in order.\n");
-    conditions.push({ label: "EMA stack aligned", required: "8 > 21 > 50 or 8 < 21 < 50", actual: "Mixed", pass: false });
-  }
-
-  return { key: "ema_3", name: "3-EMA System (8/21/50)", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 11: Heikin Ashi Trend ────────────────────────────────────────────
+// ── Strategy 2: Heikin Ashi Trend ────────────────────────────────────────────
 // 3 consecutive bullish/bearish HA candles with no opposing wicks = strong trend.
 function evalHeikinAshi(haCandles) {
   const conditions = [];
   let signal = "none";
   const last3 = haCandles.slice(-3);
 
-  console.log("\n── Strategy 11: Heikin Ashi Trend ──────────────────────\n");
+  console.log("\n── Strategy 2: Heikin Ashi Trend ───────────────────────\n");
 
   const allBullish = last3.every((c) => c.close > c.open);
   const allBearish = last3.every((c) => c.close < c.open);
@@ -924,7 +661,7 @@ function evalHeikinAshi(haCandles) {
   return { key: "heikin_ashi", name: "Heikin Ashi Trend", signal, conditions, allPass: conditions.every((c) => c.pass) };
 }
 
-// ── Strategy 12: Opening Range Breakout ───────────────────────────────────────
+// ── Strategy 3: Opening Range Breakout ───────────────────────────────────────
 // Break above/below the first candle of the UTC session = directional signal.
 function evalORB(price, orb) {
   const { high: orbHigh, low: orbLow } = orb;
@@ -932,7 +669,7 @@ function evalORB(price, orb) {
   let signal = "none";
   const orbRange = orbHigh - orbLow;
 
-  console.log("\n── Strategy 12: Opening Range Breakout ──────────────────\n");
+  console.log("\n── Strategy 3: Opening Range Breakout ───────────────────\n");
   console.log(`  ORB High: $${orbHigh.toFixed(2)} | ORB Low: $${orbLow.toFixed(2)}\n`);
 
   if (price > orbHigh) {
@@ -953,70 +690,6 @@ function evalORB(price, orb) {
   }
 
   return { key: "orb", name: "Opening Range Breakout", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 13: Support / Resistance ────────────────────────────────────────
-// Price bouncing off a key level — confirmed by RSI not being at an extreme.
-function evalSupportResistance(price, sr, rsi14) {
-  const { support, resistance } = sr;
-  const conditions = [];
-  let signal = "none";
-
-  console.log("\n── Strategy 13: Support / Resistance ───────────────────\n");
-  if (support)    console.log(`  Nearest support:    $${support.toFixed(2)}`);
-  if (resistance) console.log(`  Nearest resistance: $${resistance.toFixed(2)}\n`);
-
-  const nearSupport    = support    && Math.abs((price - support)    / price) < 0.005;
-  const nearResistance = resistance && Math.abs((price - resistance) / price) < 0.005;
-
-  if (nearSupport) {
-    signal = "long";
-    conditions.push(condition("Price at support level (within 0.5%)", `~${support.toFixed(2)}`, price.toFixed(2), nearSupport));
-    conditions.push(condition("RSI not overbought (room to bounce)", "< 60", rsi14.toFixed(2), rsi14 < 60));
-    conditions.push(condition("Support level exists", "swing low found", support ? "YES" : "NO", !!support));
-  } else if (nearResistance) {
-    signal = "short";
-    conditions.push(condition("Price at resistance level (within 0.5%)", `~${resistance.toFixed(2)}`, price.toFixed(2), nearResistance));
-    conditions.push(condition("RSI not oversold (room to reject)", "> 40", rsi14.toFixed(2), rsi14 > 40));
-    conditions.push(condition("Resistance level exists", "swing high found", resistance ? "YES" : "NO", !!resistance));
-  } else {
-    console.log("  Bias: NEUTRAL — price not at a key level.\n");
-    conditions.push({ label: "Price at key level", required: "Within 0.5% of support or resistance", actual: "Mid-range", pass: false });
-  }
-
-  return { key: "support_resistance", name: "Support / Resistance", signal, conditions, allPass: conditions.every((c) => c.pass) };
-}
-
-// ── Strategy 14: Volume Profile ───────────────────────────────────────────────
-// Trades toward the Point of Control (POC) from the Value Area edges.
-function evalVolumeProfile(price, vp, rsi14) {
-  const { poc, valueAreaHigh, valueAreaLow } = vp;
-  const conditions = [];
-  let signal = "none";
-
-  console.log("\n── Strategy 14: Volume Profile ──────────────────────────\n");
-  console.log(`  POC: $${poc.toFixed(2)} | VAH: $${valueAreaHigh.toFixed(2)} | VAL: $${valueAreaLow.toFixed(2)}\n`);
-
-  const atVAL = price <= valueAreaLow  * 1.003;
-  const atVAH = price >= valueAreaHigh * 0.997;
-  const abovePOC = price > poc;
-
-  if (atVAL && !abovePOC) {
-    signal = "long";
-    conditions.push(condition("Price at Value Area Low (buyers expected)", `≤ ${valueAreaLow.toFixed(2)}`, price.toFixed(2), atVAL));
-    conditions.push(condition("RSI oversold (< 40) — confirms weakness exhausted", "< 40", rsi14.toFixed(2), rsi14 < 40));
-    conditions.push(condition("POC above price — magnetic target", `> ${price.toFixed(2)}`, poc.toFixed(2), poc > price));
-  } else if (atVAH && abovePOC) {
-    signal = "short";
-    conditions.push(condition("Price at Value Area High (sellers expected)", `≥ ${valueAreaHigh.toFixed(2)}`, price.toFixed(2), atVAH));
-    conditions.push(condition("RSI overbought (> 60) — confirms strength exhausted", "> 60", rsi14.toFixed(2), rsi14 > 60));
-    conditions.push(condition("POC below price — magnetic target", `< ${price.toFixed(2)}`, poc.toFixed(2), poc < price));
-  } else {
-    console.log("  Bias: NEUTRAL — price not at Value Area edge.\n");
-    conditions.push({ label: "Price at Value Area edge", required: "At VAH or VAL", actual: "Mid-range", pass: false });
-  }
-
-  return { key: "volume_profile", name: "Volume Profile", signal, conditions, allPass: conditions.every((c) => c.pass) };
 }
 
 // ─── Trade Limits ────────────────────────────────────────────────────────────
@@ -1338,63 +1011,26 @@ async function processSymbol(symbol, log) {
 
   // ── Indicators ────────────────────────────────────────────────────────────
   const ema8      = calcEMA(closes, 8);
-  const ema9      = calcEMA(closes, 9);
-  const ema21     = calcEMA(closes, 21);
-  const ema50     = calcEMA(closes, 50);
-  const prevEma9  = calcEMA(prevCloses, 9);
-  const prevEma21 = calcEMA(prevCloses, 21);
   const rsi3      = calcRSI(closes, 3);
-  const rsi14     = calcRSI(closes, 14);
   const vwap      = calcVWAP(candles);
-  const bb        = calcBollingerBands(closes);
-  const macdData  = calcMACD(closes);
-  const stochRSI  = calcStochRSI(closes);
-  const supertrnd = calcSupertrend(candles);
-  const ichimoku  = calcIchimoku(candles);
-  const adxData   = calcADX(candles);
   const haCandles = calcHeikinAshi(candles);
   const orb       = calcOpeningRange(candles);
-  const sr        = calcSupportResistance(candles);
-  const vp        = calcVolumeProfile(candles);
-  const rsiSeries = calcRSISeries(closes, 14);
-  const divergence = calcRSIDivergence(closes, rsiSeries);
 
-  console.log(`\n  EMA(8):   $${ema8?.toFixed(2)    ?? "N/A"}`);
-  console.log(`  EMA(21):  $${ema21?.toFixed(2)   ?? "N/A"}`);
-  console.log(`  EMA(50):  $${ema50?.toFixed(2)   ?? "N/A"}`);
-  console.log(`  RSI(3):    ${rsi3?.toFixed(2)    ?? "N/A"}`);
-  console.log(`  RSI(14):   ${rsi14?.toFixed(2)   ?? "N/A"}`);
-  console.log(`  VWAP:     $${vwap?.toFixed(2)    ?? "N/A"}`);
-  console.log(`  BB Lower: $${bb?.lower.toFixed(2) ?? "N/A"}`);
-  console.log(`  BB Upper: $${bb?.upper.toFixed(2) ?? "N/A"}`);
-  console.log(`  MACD:      ${macdData?.macd.toFixed(4)   ?? "N/A"}`);
-  console.log(`  StochRSI K: ${stochRSI?.k.toFixed(2)    ?? "N/A"}`);
-  console.log(`  Supertrend: $${supertrnd?.value.toFixed(2) ?? "N/A"} (${supertrnd?.direction === 1 ? "▲ bull" : "▼ bear"})`);
-  console.log(`  ADX:       ${adxData?.adx.toFixed(2) ?? "N/A"} (+DI ${adxData?.plusDI.toFixed(2) ?? "N/A"} / -DI ${adxData?.minusDI.toFixed(2) ?? "N/A"})`);
-  if (vp) console.log(`  POC:      $${vp.poc.toFixed(2)} | VAH $${vp.valueAreaHigh.toFixed(2)} | VAL $${vp.valueAreaLow.toFixed(2)}`);
+  console.log(`\n  EMA(8):   $${ema8?.toFixed(2) ?? "N/A"}`);
+  console.log(`  RSI(3):    ${rsi3?.toFixed(2)  ?? "N/A"}`);
+  console.log(`  VWAP:     $${vwap?.toFixed(2)  ?? "N/A"}`);
 
   // ── Strategy Evaluation ───────────────────────────────────────────────────
   const strategies = [];
-  if (vwap && rsi3 !== null && ema8)                                              strategies.push(evalVWAPScalp(price, ema8, vwap, rsi3));
-  if (ema9 && ema21 && prevEma9 && prevEma21 && rsi14 !== null)                   strategies.push(evalEMACross(price, ema9, ema21, prevEma9, prevEma21, rsi14));
-  if (bb && rsi14 !== null)                                                       strategies.push(evalBBRSI(price, bb, rsi14));
-  if (macdData)                                                                   strategies.push(evalMACD(macdData));
-  if (stochRSI)                                                                   strategies.push(evalStochRSI(stochRSI));
-  if (supertrnd)                                                                  strategies.push(evalSupertrend(price, supertrnd));
-  if (ichimoku)                                                                   strategies.push(evalIchimoku(price, ichimoku));
-  if (divergence && rsi14 !== null)                                               strategies.push(evalRSIDivergence(divergence, rsi14));
-  if (adxData)                                                                    strategies.push(evalADX(adxData));
-  if (ema8 && ema21 && ema50)                                                     strategies.push(evalThreeEMA(price, ema8, ema21, ema50));
-  if (haCandles.length >= 3)                                                      strategies.push(evalHeikinAshi(haCandles));
-  if (orb)                                                                        strategies.push(evalORB(price, orb));
-  if (sr && rsi14 !== null)                                                       strategies.push(evalSupportResistance(price, sr, rsi14));
-  if (vp && rsi14 !== null)                                                       strategies.push(evalVolumeProfile(price, vp, rsi14));
+  if (vwap && rsi3 !== null && ema8) strategies.push(evalVWAPScalp(price, ema8, vwap, rsi3));
+  if (haCandles.length >= 3)         strategies.push(evalHeikinAshi(haCandles));
+  if (orb)                           strategies.push(evalORB(price, orb));
 
   // ── Summary ───────────────────────────────────────────────────────────────
   console.log("\n── Strategy Summary ─────────────────────────────────────\n");
   for (const s of strategies) {
     const icon = s.allPass ? "✅" : "🚫";
-    const exec = CONFIG.strategy === "all" ? " ← all active" : (s.key === CONFIG.strategy ? " ← active" : "");
+    const exec = " ← active";
     console.log(`  ${icon} ${s.name.padEnd(32)} signal=${s.signal.padEnd(5)} ${s.allPass ? "FIRES" : "blocked"}${exec}`);
   }
 
@@ -1404,7 +1040,7 @@ async function processSymbol(symbol, log) {
   console.log("\n── Decisions ────────────────────────────────────────────\n");
 
   for (const s of strategies) {
-    const isActive     = CONFIG.strategy === "all" || s.key === CONFIG.strategy;
+    const isActive     = true;
     const withinLimits = checkTradeLimits(log, s.key, symbol);
 
     const logEntry = {
@@ -1430,7 +1066,7 @@ async function processSymbol(symbol, log) {
 
     if (!s.allPass) {
       const failed = s.conditions.filter((c) => !c.pass).map((c) => c.label);
-      console.log(`🚫 [${s.name}] ${isActive ? "(active — blocked)" : "(monitoring)"}`);
+      console.log(`🚫 [${s.name}] (active — blocked)`);
       failed.forEach((f) => console.log(`   - ${f}`));
     } else if (!withinLimits) {
       console.log(`🚫 [${s.name}] SIGNAL fired but daily limit reached for ${symbol}`);
@@ -1475,8 +1111,8 @@ async function run() {
   console.log(`  ${new Date().toISOString()}`);
   console.log(`  Mode:     ${CONFIG.paperTrading ? "📋 PAPER TRADING" : "🔴 LIVE TRADING"}`);
   console.log(`  Assets:   ${CONFIG.symbols.join(", ")}`);
-  console.log(`  Active:   ${CONFIG.strategy === "all" ? "ALL strategies (paper testing mode)" : `${CONFIG.strategy} (executes orders)`}`);
-  console.log(`  Logging:  all 14 strategies × ${CONFIG.symbols.length} assets → trades.csv + Azure SQL`);
+  console.log(`  Active:   vwap_scalp, heikin_ashi, orb (all execute orders)`);
+  console.log(`  Logging:  3 strategies × ${CONFIG.symbols.length} assets → trades.csv + Azure SQL`);
   if (CONFIG.azureFn.enabled) console.log(`  Azure Fn: ${CONFIG.azureFn.url}`);
   console.log("═══════════════════════════════════════════════════════════");
 

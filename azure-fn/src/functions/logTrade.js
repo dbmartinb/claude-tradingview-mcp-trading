@@ -144,7 +144,7 @@ app.http("logTrade", {
     } catch (err) {
       context.log.error("SQL error:", err.message);
       pool = null; // reset pool on error so next call reconnects
-      return { status: 500, body: `SQL error: ${err.message}` };
+      return { status: 500, body: "Internal error — trade not logged" };
     }
   },
 });

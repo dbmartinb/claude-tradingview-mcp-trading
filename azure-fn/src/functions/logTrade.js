@@ -487,13 +487,13 @@ app.http("logTrade", {
           .input("notes",       sql.NVarChar(500),   notes)
           .query(`
             INSERT INTO trades
-              (trade_date, trade_time, exchange, symbol, strategy, signal,
+              (id, trade_date, trade_time, exchange, symbol, strategy, signal,
                side, quantity, price, total_usd, fee_est, net_amount,
-               order_id, mode, notes)
+               order_id, mode, notes, created_at)
             VALUES
-              (@trade_date, @trade_time, @exchange, @symbol, @strategy, @signal,
+              (ABS(CHECKSUM(NEWID())), @trade_date, @trade_time, @exchange, @symbol, @strategy, @signal,
                @side, @quantity, @price, @total_usd, @fee_est, @net_amount,
-               @order_id, @mode, @notes)
+               @order_id, @mode, @notes, GETUTCDATE())
           `);
 
         inserted++;

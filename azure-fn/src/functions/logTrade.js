@@ -399,7 +399,7 @@ app.http("getDashboard", {
         body: buildDashboardHtml(stratMap, symRes.recordset, overallRes.recordset[0] || {}),
       };
     } catch (err) {
-      context.log.error("Dashboard error:", err.message);
+      context.error("Dashboard error:", err.message);
       return {
         status: 500,
         headers: { "Content-Type": "text/html; charset=utf-8" },
@@ -503,7 +503,7 @@ app.http("logTrade", {
       return { status: 200, body: JSON.stringify({ inserted }) };
 
     } catch (err) {
-      context.log.error("SQL error:", err.message);
+      context.error("SQL error:", err.message);
       pool = null; // reset pool on error so next call reconnects
       return { status: 500, body: "Internal error — trade not logged" };
     }
